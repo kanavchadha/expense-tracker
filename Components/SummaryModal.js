@@ -59,7 +59,7 @@ export default OverAllExpenseSummaryModal = ({ modalVisible, setModalVisible }) 
                             <>
                                 <SummaryHeader monthlyIncome={monthlyIncome} status={status} totalExpenditure={totalExpenditure.total} summaryDetails={totalExpenditure.details} />
                                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                    <Chart selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalExpenseCount={totalExpenditure.count} />
+                                    <Chart selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={totalExpenditure.count} />
                                 </View>
                                 <ExpenseSummary data={chartData} selectedCategory={category} setSelectedCategory={setCategory} status={status} totalExpenditure={totalExpenditure.details?.paidExpenseTotal} totalIncome={monthlyIncome?.paidAmount} />
                             </>

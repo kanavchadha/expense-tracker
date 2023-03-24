@@ -4,35 +4,37 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react'
 import { FONTS, COLORS, MONTHS } from '../constants';
 
-const renderOptions = (hideAll) => {
-    if (hideAll) {
+const renderOptions = (hideAll, statusOptions) => {
+    if (!statusOptions) {
         return [
-            <Picker.Item key='1' label='PAID' value='true' />,
-            <Picker.Item key='2' label='UNPAID' value='false' />
+            <Picker.Item key='1' label='ALL' value='all' />,
+            <Picker.Item key='2' label='PAID' value='true' />,
+            <Picker.Item key='3' label='UNPAID' value='false' />
         ]
+    } else {
+        if (!Array.isArray(statusOptions)) return <Picker.Item key='1' label='None' value='' />
+        return statusOptions.map(option => <Picker.Item key={option.id} label={option.label} value={option.value} />)
     }
-    return [
-        <Picker.Item key='1' label='ALL' value='all' />,
-        <Picker.Item key='2' label='PAID' value='true' />,
-        <Picker.Item key='3' label='UNPAID' value='false' />
-    ]
 }
 
-const OptionsBar = ({ status, setStatus, onPressDownload, hideAll, month, setMonth, filter, setFilter, filters, downloadIconBtn }) => {
+const OptionsBar = ({ status, setStatus, statusOptions, onPressDownload, month, setMonth, filter, setFilter, filters, iconBtn, summaryIcon, onPressSummary }) => {
 
     return (
         <View style={styles.extraSection}>
-            <View style={styles.dropdown}>
-                <Picker
-                    selectedValue={status}
-                    mode='dropdown'
-                    style={{ color: COLORS.secondary, marginBottom: -15, ...FONTS.body3 }}
-                    dropdownIconColor={COLORS.secondary}
-                    onValueChange={(itemValue) => setStatus(itemValue)}
-                >
-                    {renderOptions(hideAll).map(option => option)}
-                </Picker>
-            </View>
+            {
+                (status !== null && status !== undefined) &&
+                <View style={styles.dropdown}>
+                    <Picker
+                        selectedValue={status}
+                        mode='dropdown'
+                        style={{ color: COLORS.secondary, marginBottom: -15, ...FONTS.body3 }}
+                        dropdownIconColor={COLORS.secondary}
+                        onValueChange={(itemValue) => setStatus(itemValue)}
+                    >
+                        {renderOptions(statusOptions).map(option => option)}
+                    </Picker>
+                </View>
+            }
             {
                 (month !== null && month !== undefined) &&
                 <View style={styles.dropdown}>
@@ -59,9 +61,21 @@ const OptionsBar = ({ status, setStatus, onPressDownload, hideAll, month, setMon
                     </Picker>
                 </View>
             }
+            {
+                (summaryIcon !== null && summaryIcon !== undefined) &&
+                <TouchableOpacity activeOpacity={0.5} onPress={onPressSummary} style={{ marginRight: 5 }}>
+                    {iconBtn ?
+                        <Ionicons name={summaryIcon} size={30} color={COLORS.secondary} /> :
+                        <View style={styles.downloadBtn}>
+                            <Text style={styles.downloadBtnText}>Summary</Text>
+                            <Ionicons name={summaryIcon} size={16} color={COLORS.lightGray} />
+                        </View>
+                    }
+                </TouchableOpacity>
+            }
             <TouchableOpacity activeOpacity={0.5} onPress={onPressDownload}>
-                {downloadIconBtn ?
-                    <Ionicons name='arrow-down-circle' size={30} color={COLORS.secondary} /> :
+                {iconBtn ?
+                    <Ionicons name='arrow-down-circle' size={35} color={COLORS.secondary} /> :
                     <View style={styles.downloadBtn}>
                         <Text style={styles.downloadBtnText}>Download</Text>
                         <Ionicons name='download-sharp' size={16} color={COLORS.lightGray} />

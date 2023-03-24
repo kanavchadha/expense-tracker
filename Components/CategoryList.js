@@ -1,8 +1,9 @@
 import React, { useRef } from "react";
 import { StyleSheet, View, Text, Image, TouchableOpacity, FlatList, Animated } from 'react-native';
-import { COLORS, FONTS, SIZES, icons, categoryOptions } from '../constants';
+import { COLORS, FONTS, SIZES, icons } from '../constants';
 
-export default CategoryList = ({ setSelectedCategory, selectedCategory }) => {
+export default CategoryList = ({ setSelectedCategory, selectedCategory, categories, height }) => {
+    const fullHeight = height || 448;
     const [showMoreToggle, setShowMoreToggle] = React.useState(false)
     const categoryListHeightAnimationValue = useRef(new Animated.Value(115)).current;
 
@@ -43,7 +44,7 @@ export default CategoryList = ({ setSelectedCategory, selectedCategory }) => {
         <View style={{ paddingHorizontal: SIZES.padding - 5 }}>
             <Animated.View style={{ height: categoryListHeightAnimationValue }}>
                 <FlatList
-                    data={categoryOptions}
+                    data={categories}
                     renderItem={renderItem}
                     keyExtractor={item => `${item.id}`}
                     numColumns={2}
@@ -67,7 +68,7 @@ export default CategoryList = ({ setSelectedCategory, selectedCategory }) => {
                         }).start()
                     } else {
                         Animated.timing(categoryListHeightAnimationValue, {
-                            toValue: 448,
+                            toValue: fullHeight,
                             duration: 680,
                             useNativeDriver: false
                         }).start()

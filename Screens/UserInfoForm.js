@@ -10,7 +10,7 @@ import { Picker } from '@react-native-picker/picker';
 import { deleteAllExpenseData } from '../DB';
 
 const UserInfoForm = () => {
-  const { goBack } = useNavigation();
+  const { goBack, navigate } = useNavigation();
   const { userName, userImage, notification, setName, setImage, setNotification, saveUserData } = useContext(UserContext);
 
   const submit = async () => {
@@ -45,6 +45,10 @@ const UserInfoForm = () => {
     );
   }
 
+  const openInvestments = () => {
+    navigate('Investment')
+  }
+
   return (
     <FormModal title='Personal Information' submit={submit} successMsg='Information Saved Successfully.'>
       <Text style={styles.inputLable}>Your Good Name: </Text>
@@ -65,6 +69,9 @@ const UserInfoForm = () => {
       {notification === 'EveryDay' &&
         <Text style={{ ...FONTS.h4, color: COLORS.purple, }}>NOTE: In "EveryDay" notifications you atleast have to open App once in a day! </Text>
       }
+      <View style={{ marginTop: 20 }}>
+        <Button title='My Investments' color={COLORS.blue} onPress={openInvestments} />
+      </View>
       <View style={{ marginTop: 20 }}>
         <Button title='Delete All Expense Data' color={COLORS.danger} onPress={deleteExpenseDataHandler} />
       </View>

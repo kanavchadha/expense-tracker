@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ScrollView, View } from 'react-native';
-import { COLORS } from '../constants';
+import { COLORS, categoryOptions } from '../constants';
 import NavBar from '../Components/Navbar';
 import Header from '../Components/Header';
 import CategoryList from '../Components/CategoryList';
@@ -10,9 +10,9 @@ import ExpenseCharts from '../Components/ExpenseCharts';
 import OverAllExpenseSummaryModal from "../Components/SummaryModal";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default Home = () => {
+const Home = () => {
 
-    const [viewMode, setViewMode] = useState("list")
+    const [viewMode, setViewMode] = useState("list");
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [month, setMonth] = useState(new Date().getMonth());
     const [modalVisible, setModalVisible] = useState(false);
@@ -25,13 +25,13 @@ export default Home = () => {
                 {/* Header section */}
                 <Header month={month} setModalVisible={setModalVisible} />
                 {/* Category Header Section */}
-                <CategoryHeader viewMode={viewMode} setViewMode={setViewMode} />
+                <CategoryHeader viewMode={viewMode} setViewMode={setViewMode} numOfCategories={categoryOptions.length - 1} />
 
                 <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
                     {
                         viewMode == "list" &&
                         <View>
-                            <CategoryList selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+                            <CategoryList selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} categories={categoryOptions} />
                             <Expenses selectedCategory={selectedCategory} month={month} setMonth={setMonth} />
                         </View>
                     }
@@ -45,3 +45,5 @@ export default Home = () => {
         </SafeAreaView>
     )
 }
+
+export default Home;

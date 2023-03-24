@@ -2,13 +2,13 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { COLORS, FONTS, SIZES, icons } from '../constants';
 
-export default CategoryHeader = ({ viewMode, setViewMode }) => {
+export default CategoryHeader = ({ viewMode, setViewMode, numOfCategories }) => {
     return (
         <View style={{ flexDirection: 'row', paddingVertical: 8, paddingHorizontal: SIZES.padding, justifyContent: 'space-between', alignItems: 'center', marginTop: 3 }}>
             <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
                 <View>
                     <Text style={{ color: COLORS.primary, ...FONTS.h3 }}>CATEGORIES</Text>
-                    <Text style={{ color: COLORS.darkgray, ...FONTS.body4 }}> 14 Total</Text>
+                    <Text style={{ color: COLORS.darkgray, ...FONTS.body4 }}> {numOfCategories} Total</Text>
                 </View>
             </View>
             <View style={{ flexDirection: 'row' }}>

@@ -4,7 +4,7 @@ import { VictoryPie } from 'victory-native';
 import { Svg } from 'react-native-svg';
 import { FONTS, SIZES, COLORS } from '../constants';
 
-const Chart = ({selectedCategory, setSelectCategoryByName, chartData, colorScales, totalExpenseCount }) => {
+const Chart = ({ selectedCategory, setSelectCategoryByName, chartData, colorScales, totalCount, title }) => {
     return (
         <>
             {Platform.OS === 'ios' ?
@@ -80,9 +80,9 @@ const Chart = ({selectedCategory, setSelectCategoryByName, chartData, colorScale
                     />
                 </Svg>
             }
-            <View style={{ position: 'absolute', top: '42%', left: "42%" }} onTouchEnd={()=>setSelectCategoryByName('All')}>
-                <Text style={{ ...FONTS.h1, textAlign: 'center', color: COLORS.primary }}>{totalExpenseCount}</Text>
-                <Text style={{ ...FONTS.body3, textAlign: 'center', color: COLORS.primary }}>Expenses</Text>
+            <View style={{ position: 'absolute', top: '42%', left: "42%" }} onTouchEnd={() => setSelectCategoryByName('All')}>
+                <Text numberOfLines={1} style={{ ...FONTS.h1, textAlign: 'center', color: COLORS.primary }}>{totalCount}</Text>
+                <Text numberOfLines={1} style={{ ...FONTS.body3, textAlign: 'center', color: COLORS.primary }}>{title}</Text>
             </View>
         </>
     )

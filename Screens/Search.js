@@ -16,6 +16,7 @@ import { SummaryModal } from '../Components/SummaryModal';
 import Chart from "../Components/Chart";
 import ExpenseSummary from '../Components/ExpenseSummary';
 import ViewShot from 'react-native-view-shot';
+import DateRange from '../Components/DateRange';
 
 const LIMIT = 20;
 const CURR_DATE = new Date();
@@ -79,13 +80,13 @@ const Search = () => {
             timeZoneOffsetInMinutes: -330,
             onChange: (event, value) => {
                 if (ds === 'to') {
-                    value.setUTCHours(23,59,59);
+                    value.setUTCHours(23, 59, 59);
                     if (value.getTime() < fromDate.getTime()) {
                         return showToastMessage('Please select valid Input!', 'top', 'long');
                     }
                     setToDate(value);
                 } else {
-                    value.setUTCHours(0,0,0);
+                    value.setUTCHours(0, 0, 0);
                     if (toDate.getTime() < value.getTime()) {
                         return showToastMessage('Please select valid Input!', 'top', 'long');
                     }
@@ -130,7 +131,7 @@ const Search = () => {
 
     const fetchMoreExpense = async () => {
         try {
-            if (loading || expenses.length<20) return;
+            if (loading || expenses.length < 20) return;
             setLoading(true);
             let moreExpenses = [];
             if (search) {
@@ -232,33 +233,20 @@ const Search = () => {
                         }
                     </TouchableOpacity>
                 </View>
-                <View style={{ ...styles.searchBar, margin: 5 }}>
-                    <TouchableOpacity onPress={() => openDatePicker('from')} activeOpacity={0.8} style={{ flex: 1 }}>
-                        <View>
-                            <Text style={styles.dateLabel}>From: </Text>
-                            <View style={styles.dateInput}>
-                                <Text style={styles.dateText} numberOfLines={1}>{fromDate.toUTCString().split('00:')[0]}</Text>
-                                <Ionicons name='caret-down' color={COLORS.primary} />
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                    <Ionicons name='arrow-forward-sharp' size={28} color={COLORS.secondary} style={{ paddingHorizontal: 4, marginTop: 15 }} />
-                    <TouchableOpacity onPress={() => openDatePicker('to')} activeOpacity={0.8} style={{ flex: 1 }}>
-                        <View>
-                            <Text style={styles.dateLabel}>To: </Text>
-                            <View style={styles.dateInput}>
-                                <Text style={styles.dateText} numberOfLines={1}>{toDate.toUTCString().split('23:')[0]}</Text>
-                                <Ionicons name='caret-down' color={COLORS.primary} />
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                </View>
+                <DateRange fromDate={fromDate} toDate={toDate} setFromDate={setFromDate} setToDate={setToDate} />
                 {!loading &&
                     <View style={styles.searchBar}>
-                        <OptionsBar status={status} setStatus={setStatus} onPressDownload={downloadExpenses} filter={order} setFilter={setOrder} filters={SEARCH_FILTERS} downloadIconBtn={true} />
-                        <TouchableOpacity activeOpacity={0.3} onPress={() => setModalVisible(true)} style={{ marginRight: 5 }}>
-                            <Ionicons name='stats-chart-outline' size={20} color={COLORS.secondary} />
-                        </TouchableOpacity>
+                        <OptionsBar
+                            status={status}
+                            setStatus={setStatus}
+                            onPressDownload={downloadExpenses}
+                            filter={order}
+                            setFilter={setOrder}
+                            filters={SEARCH_FILTERS}
+                            iconBtn={true}
+                            summaryIcon='stats-chart-outline'
+                            onPressSummary={() => setModalVisible(true)}
+                        />
                     </View>
                 }
             </View>
@@ -339,7 +327,7 @@ const SearchResSummary = ({ modalVisible, setModalVisible, expensesSummary, stat
                             summaryDetails={expensesSummary.expSumDetail}
                         />
                         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            <Chart selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalExpenseCount={expensesSummary.expenseCount} />
+                            <Chart selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={expensesSummary.expenseCount} />
                         </View>
                         <ExpenseSummary data={chartData} selectedCategory={category} setSelectedCategory={setCategory} status={status} totalExpenditure={expensesSummary?.expSumDetail?.paidExpenseTotal} totalIncome={expensesSummary?.income?.paidAmount} />
                     </View>
@@ -365,27 +353,6 @@ const styles = StyleSheet.create({
         fontFamily: FONTS.body2.fontFamily,
         marginHorizontal: 5,
         marginLeft: 15
-    },
-    dateText: {
-        fontSize: FONTS.body3.fontSize,
-        fontFamily: FONTS.body3.fontFamily,
-        color: COLORS.primary
-    },
-    dateLabel: {
-        fontSize: FONTS.h3.fontSize,
-        fontFamily: FONTS.h3.fontFamily,
-        color: COLORS.secondary,
-        paddingHorizontal: 3
-    },
-    dateInput: {
-        borderWidth: 1.5,
-        borderColor: COLORS.secondary,
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 6,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center'
     },
     header: {
         paddingVertical: 2,

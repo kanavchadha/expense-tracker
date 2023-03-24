@@ -1,31 +1,22 @@
-import * as SQLite from 'expo-sqlite';
-import { categoryOptions } from './constants';
-
-const db = SQLite.openDatabase('ExpenseTracker.db');
-
-export const init = async () => {
-    const promise = new Promise((resolve, reject) => {
-        db.transaction((tx) => { // for creating queries. if some part of query fails, it rollback whole query.
-            tx.executeSql('CREATE TABLE IF NOT EXISTS expense (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, category TEXT NOT NULL, amount REAL NOT NULL, date TEXT NOT NULL, description TEXT NOT NULL, status TEXT NOT NULL );',
-                [],
-                () => { resolve() },
-                (_, err) => { reject(err) },
-            );
-        })
-    });
-    return promise;
-}
+import { db } from './index';
+import { categoryOptions } from '../constants';
 
 export const deleteAllExpenseData = async () => {
     const promise = new Promise((resolve, reject) => {
         db.transaction((tx) => {
             tx.executeSql('DROP TABLE IF EXISTS expense', [],
-                () => { console.log('deleted successfully!'); },
+                () => { console.log('Deleted Expenses data successfully!'); },
                 (_, err) => { reject(err) },
             );
-        })
+            tx.executeSql('CREATE TABLE IF NOT EXISTS expense (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, category TEXT NOT NULL, amount REAL NOT NULL, date TEXT NOT NULL, description TEXT NOT NULL, status TEXT NOT NULL );', [],
+                () => { console.log('Created New Expenses Table successfully!'); },
+                (_, err) => { reject(err) },
+            );
+        },
+            (err) => { reject(err) },
+            () => { resolve('Deleted Expenses Data!') }
+        )
     });
-    await init();
     return promise;
 }
 
