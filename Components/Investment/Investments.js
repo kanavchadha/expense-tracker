@@ -1,27 +1,24 @@
-import React, { useState } from "react";
-import { ScrollView, View, Text, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useCallback, useMemo } from "react";
+import { View, Text, ActivityIndicator, Alert } from 'react-native';
 import InvestmentList from './InvestmentList';
 import OptionsBar from "../OptionsBar";
 import { getInvestmentsCategoryGrouped, removeInvestment } from "../../DB";
-import { generateHtmlTemplate } from "../../helpers";
+import { generateHtmlTemplate, showToastMessage } from "../../helpers";
 import { INVESTMENT_FILTERS, INVESTMENT_SORT_OPTIONS } from "../../constants/data";
-
-const CURR_DATE = new Date();
-const CURR_END_DATE = new Date();
-CURR_DATE.setUTCHours(0, 0, 0);
-CURR_END_DATE.setMonth(0);
-CURR_END_DATE.setDate(0);
-CURR_END_DATE.setUTCHours(23, 59, 59);
+import { useFocusEffect } from "@react-navigation/native";
+import { COLORS, FONTS } from "../../constants";
+import InvestmentDetailsModal from "./InvestmentDetails";
 
 const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) => {
     const [allInvestments, setAllInvestments] = useState({});
     const [investmentSummary, setInvestmentSummary] = useState([]);
     const [order, setOrder] = useState('id DESC');
+    const [selectedInvestmentId, setSelectedInvestmentId] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const onLoad = async () => {
         setLoading(true);
-        getInvestmentsCategoryGrouped(fromDate, toDate).then(res => {
+        getInvestmentsCategoryGrouped(fromDate.toISOString(), toDate.toISOString(), status, order).then(res => {
             setInvestmentSummary(res.investmentCategoriesTotal);
             delete res['investmentCategoriesTotal'];
             setAllInvestments(res);
@@ -55,13 +52,18 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
             const catSummary = getInvestmentSummary(category);
             return <InvestmentList
                 key={category}
-                expenses={allInvestments[category].expenseList}
+                investments={allInvestments[category].investmentList}
                 title={category}
-                expenseCount={catSummary ? catSummary.count : 0}
-                expenseTotal={catSummary ? catSummary.totalAmount : 0}
-                month={month}
-                updateExpenseList={updateInvestmentList}
-                deleteExpense={deleteInvestment}
+                investmentCount={catSummary ? catSummary.count : 0}
+                totalInvested={catSummary ? catSummary.totalInvested : 0}
+                totalReturns={catSummary ? catSummary.totalReturns : 0}
+                fromDate={fromDate}
+                toDate={toDate}
+                status={status}
+                order={order}
+                updateInvestmentList={updateInvestmentList}
+                deleteInvestment={deleteInvestment}
+                showInvestmentDetails={showInvestmentDetails}
             />
         })
     }
@@ -79,7 +81,7 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
     const deleteInvestment = async (id) => {
         try {
             const res = await removeInvestment(id);
-            if (res.rowsAffected !== 1) throw new Error('Error in Deleting Data');
+            if (!res.investment || !res.expense) throw new Error('Error in Deleting Data');
             showToastMessage('Investment deleted successfully', 'bottom', 'long');
             onLoad();
             return true;
@@ -87,6 +89,10 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
             Alert.alert('Something went wrong!', 'Unable to delete Investment. ' + err.message);
             return false;
         }
+    }
+
+    const showInvestmentDetails = (id)=>{
+        setSelectedInvestmentId(id);
     }
 
     const downloadAllInvestment = async () => {
@@ -109,7 +115,10 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
         }
     }
 
+    const summary = useMemo(()=>getInvestmentSummary(selectedCategory), [selectedCategory]);
+
     return (
+        <>
         <View>
             {!loading &&
                 <OptionsBar
@@ -126,16 +135,23 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
                 selectedCategory === 'All' ?
                     renderAllInvestments() :
                     <InvestmentList
-                        expenses={allInvestments[selectedCategory] ? allInvestments[selectedCategory].expenseList : []}
+                        investments={allInvestments[selectedCategory] ? allInvestments[selectedCategory].investmentList : []}
                         title={selectedCategory}
-                        expenseCount={summary ? summary.count : 0}
-                        expenseTotal={summary ? summary.totalAmount : 0}
-                        month={month}
-                        updateExpenseList={updateInvestmentList}
-                        deleteExpense={deleteInvestment}
+                        investmentCount={summary ? summary.count : 0}
+                        totalInvested={summary ? summary.totalInvested : 0}
+                        totalReturns={summary ? summary.totalReturns : 0}
+                        fromDate={fromDate}
+                        toDate={toDate}
+                        status={status}
+                        order={order}
+                        updateInvestmentList={updateInvestmentList}
+                        deleteInvestment={deleteInvestment}
+                        showInvestmentDetails={showInvestmentDetails}
                     />
             }
         </View>
+        <InvestmentDetailsModal id={selectedInvestmentId} setShowDetails={setSelectedInvestmentId} />
+        </>
     )
 }
 

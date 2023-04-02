@@ -7,7 +7,7 @@ import { UserContext } from '../Context/user';
 import { showToastMessage } from '../helpers';
 import { useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
-import { deleteAllExpenseData } from '../DB';
+import { clearDB } from '../DB';
 
 const UserInfoForm = () => {
   const { goBack, navigate } = useNavigation();
@@ -22,17 +22,17 @@ const UserInfoForm = () => {
     goBack();
   }
 
-  const deleteExpenseDataHandler = () => {
-    Alert.alert('Delete All Your Expense Data?', 'Are you sure, you want delete your all expense data from this device?',
+  const deleteAllDataHandler = () => {
+    Alert.alert('Delete All Your Expense and Investment Data?', 'Are you sure, you want delete your all expenses and investments data from this device?',
       [
         {
           text: "DELETE",
           style: "default",
           onPress: () => {
-            deleteAllExpenseData().then(res => {
-              showToastMessage('Expense Data Deleted Successfully!');
+            clearDB().then(res => {
+              showToastMessage('Your all Data has been Deleted Successfully!');
             }).catch(err => {
-              showToastMessage('Failed to delete Expense data! ' + err.message);
+              showToastMessage('Failed to delete data! ' + err.message);
             })
           }
         },
@@ -73,7 +73,7 @@ const UserInfoForm = () => {
         <Button title='My Investments' color={COLORS.blue} onPress={openInvestments} />
       </View>
       <View style={{ marginTop: 20 }}>
-        <Button title='Delete All Expense Data' color={COLORS.danger} onPress={deleteExpenseDataHandler} />
+        <Button title='Delete All Data' color={COLORS.danger} onPress={deleteAllDataHandler} />
       </View>
     </FormModal>
   )

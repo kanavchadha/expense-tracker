@@ -4,18 +4,20 @@ import icons from "./icons";
 export const categoryOptions = [
     { id: '1', icon: icons.category, color: COLORS.black, value: 'Category' },
     { id: '4', icon: icons.education, color: COLORS.yellow, value: 'Education' },
-    { id: '5', icon: icons.food, color: COLORS.darkYellow, value: 'Food/Eatables' },
-    { id: '8', icon: icons.bill, color: COLORS.darkBlue, value: 'Bills' },
-    { id: '3', icon: icons.rent, color: COLORS.seaGreen, value: 'Rent' },
+    { id: '5', icon: icons.food, color: COLORS.peach, value: 'Food/Eatables' },
+    { id: '8', icon: icons.bill, color: COLORS.seaGreen, value: 'Bills' },
+    { id: '3', icon: icons.rent, color: COLORS.darkBlue, value: 'Rent' },
     { id: '7', icon: icons.homeNeeds, color: COLORS.orange, value: 'Home Needs' },
-    { id: '9', icon: icons.vehicle, color: COLORS.blue, value: 'Vehicles' },
-    { id: '6', icon: icons.child, color: COLORS.peach, value: 'Child' },
+    { id: '9', icon: icons.vehicle, color: COLORS.steelblue, value: 'Vehicles' },
+    { id: '6', icon: icons.child, color: COLORS.darkYellow, value: 'Child' },
     { id: '13', icon: icons.healthcare, color: COLORS.red, value: 'Medical' },
     { id: '10', icon: icons.beautyCare, color: COLORS.pink, value: 'Beauty and Care' },
     { id: '11', icon: icons.cloth, color: COLORS.darkgreen, value: 'Clothing' },
     { id: '12', icon: icons.enjoyment, color: COLORS.purple, value: 'Enjoyment' },
     { id: '14', icon: icons.personalNeeds, color: COLORS.babyPurple, value: 'Personal Need' },
-    { id: '15', icon: icons.other, color: COLORS.olive, value: 'Other' },
+    { id: '15', icon: icons.stocks, color: COLORS.blue, value: 'Investment' },
+    { id: '16', icon: icons.gifts, color: COLORS.babyPink, value: 'Gifts' },
+    { id: '17', icon: icons.other, color: COLORS.gray, value: 'Other' },
     { id: '2', icon: icons.income, color: COLORS.primary, value: 'Monthly Income' },
 ];
 
@@ -34,7 +36,7 @@ export const MONTHS = [
     {id: 11, value: 'December'},
 ];
 
-export const SEARCH_FILTERS = [
+export const SEARCH_SORT_OPTIONS = [
     {id: '0', label: 'Newest First', value: 'id DESC'},
     {id: '1', label: 'Oldest First', value: 'id ASC'},
     {id: '2', label: 'Amount-Low->High', value: 'amount ASC'},

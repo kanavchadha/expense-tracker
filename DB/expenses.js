@@ -1,4 +1,4 @@
-import { db } from './index';
+import { db } from './db';
 import { categoryOptions } from '../constants';
 
 export const deleteAllExpenseData = async () => {
@@ -8,7 +8,7 @@ export const deleteAllExpenseData = async () => {
                 () => { console.log('Deleted Expenses data successfully!'); },
                 (_, err) => { reject(err) },
             );
-            tx.executeSql('CREATE TABLE IF NOT EXISTS expense (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, category TEXT NOT NULL, amount REAL NOT NULL, date TEXT NOT NULL, description TEXT NOT NULL, status TEXT NOT NULL );', [],
+            tx.executeSql('CREATE TABLE IF NOT EXISTS expense (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, category TEXT NOT NULL, amount REAL NOT NULL, date TEXT NOT NULL, description TEXT NOT NULL, status TEXT NOT NULL, invId INTEGER);', [],
                 () => { console.log('Created New Expenses Table successfully!'); },
                 (_, err) => { reject(err) },
             );
@@ -20,11 +20,11 @@ export const deleteAllExpenseData = async () => {
     return promise;
 }
 
-export const insertExpense = async (title, category, amount, date, description, status) => {
+export const insertExpense = async (title, category, amount, date, description, status, invId = null) => {
     const promise = new Promise((resolve, reject) => {
         db.transaction((tx) => { // for creating queries. if some part of query fails, it rollback whole query.
-            tx.executeSql(`INSERT INTO expense (title, category, amount, date, description, status) VALUES (?, ?, ?, datetime(?, 'localtime'), ?, ?);`, // here we insert question marks instead of adding values directly because to prevent sql injection. 
-                [title, category, amount, date, description, status], // we pass our args here, as it now first validates thse args i.e these args should not be a valid sql statement, and then it will be replaces the ?, hence we can prevent sql injections.
+            tx.executeSql(`INSERT INTO expense (title, category, amount, date, description, status, invId) VALUES (?, ?, ?, datetime(?, 'localtime'), ?, ?, ?);`, // here we insert question marks instead of adding values directly because to prevent sql injection. 
+                [title, category, amount, date, description, status, invId], // we pass our args here, as it now first validates thse args i.e these args should not be a valid sql statement, and then it will be replaces the ?, hence we can prevent sql injections.
                 (_, result) => { resolve(result) },
                 (_, err) => { reject(err) },
             );
@@ -52,10 +52,10 @@ export const getExpensesCategoryGrouped = async (status = 'false', month = null)
         const monthDate = getMonthStartEndDate(month);
         let status2 = status;
         db.transaction((tx) => {
-            let query = `SELECT category, SUM(amount) AS totalAmount, COUNT(id) AS count FROM expense WHERE status = ? AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) GROUP BY category LIMIT 10;`
+            let query = `SELECT category, SUM(amount) AS totalAmount, COUNT(id) AS count FROM expense WHERE status = ? AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) GROUP BY category;`
             if (status === 'all') {
                 status = 'false';
-                query = `SELECT category, SUM(amount) AS totalAmount, COUNT(id) AS count FROM expense WHERE (status = ? OR status = 'true') AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) GROUP BY category LIMIT 10;`
+                query = `SELECT category, SUM(amount) AS totalAmount, COUNT(id) AS count FROM expense WHERE (status = ? OR status = 'true') AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) GROUP BY category;`
             }
             tx.executeSql(query,
                 [status, monthDate.startDate, monthDate.endDate],
@@ -276,10 +276,10 @@ export const getMonthlyExpenseAnalysis = async (month, status = 'all') => {
 
 export const getMonthStartEndDate = (month) => {
     let date = new Date();
-    date = new Date(date.getFullYear(), month ? month : date.getMonth(), 2);
+    date = new Date(date.getFullYear(), (month || month === 0) ? month : date.getMonth(), 2);
     date.setUTCHours(0, 0, 0, 0);
     const startDate = date.toISOString();
-    date = new Date(date.getFullYear(), month ? month + 1 : date.getMonth() + 1, 1);
+    date = new Date(date.getFullYear(), (month || month === 0) ? month + 1 : date.getMonth() + 1, 1);
     date.setUTCHours(23, 59, 59, 0);
     const endDate = date.toISOString();
     // console.log(startDate, endDate);

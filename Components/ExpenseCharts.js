@@ -40,7 +40,9 @@ export default function ExpenseCharts({ selectedCategory, setSelectedCategory, m
         showToastMessage('Downloading Started...', 'bottom', 'long');
         chartContainer.current.capture().then(uri => {
             console.log('File has been saved to:', uri);
-            shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+            showToastMessage('Downloading Completed...', 'bottom', 'long');
+            return shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+        }).then((res)=>{
             showToastMessage('Downloading Completed...', 'bottom', 'long');
         }).catch(err => {
             showToastMessage('Download Failed...', 'bottom', 'long');

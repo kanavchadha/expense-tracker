@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react'
 import { FONTS, COLORS, MONTHS } from '../constants';
 
-const renderOptions = (hideAll, statusOptions) => {
+const renderOptions = (statusOptions) => {
     if (!statusOptions) {
         return [
             <Picker.Item key='1' label='ALL' value='all' />,

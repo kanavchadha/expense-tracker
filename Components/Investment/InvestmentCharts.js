@@ -16,7 +16,6 @@ export default function InvestmentCharts({ fromDate, toDate, selectedCategory, s
     const [colorScales, setColorScales] = useState([]);
     const [totalInvestment, setTotalInvestment] = useState({});
     const [totalReturns, setTotalReturns] = useState();
-    const [status, setStatus] = useState('all');
     const [loading, setLoading] = useState(false);
     const chartContainer = useRef();
 
@@ -40,7 +39,8 @@ export default function InvestmentCharts({ fromDate, toDate, selectedCategory, s
         showToastMessage('Downloading Started...', 'bottom', 'long');
         chartContainer.current.capture().then(uri => {
             console.log('File has been saved to:', uri);
-            shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+            return shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+        }).then((res)=>{
             showToastMessage('Downloading Completed...', 'bottom', 'long');
         }).catch(err => {
             showToastMessage('Download Failed...', 'bottom', 'long');
@@ -63,9 +63,9 @@ export default function InvestmentCharts({ fromDate, toDate, selectedCategory, s
                     <>
                         {/* <SummaryHeader monthlyIncome={monthlyIncome} status={status} totalInvestment={totalInvestment.total} summaryDetails={totalInvestment.details} /> */}
                         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            <Chart selectedCategory={selectedCategory} setSelectCategoryByName={setSelectedCategory} chartData={chartData} colorScales={colorScales} totalCount={totalInvestment.count} />
+                            <Chart title='Investments' selectedCategory={selectedCategory} setSelectCategoryByName={setSelectedCategory} chartData={chartData} colorScales={colorScales} totalCount={totalInvestment.count} />
                         </View>
-                        <InvestmentSummary data={chartData} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} status={status} totalInvestment={totalInvestment.details?.paidExpenseTotal} totalIncome={monthlyIncome?.paidAmount} />
+                        <InvestmentSummary data={chartData} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} status={status} totalInvestment={totalInvestment.details?.paidExpenseTotal} totalReturns={totalInvestment.details?.paidExpenseTotal} />
                     </>
                 }
             </ViewShot>

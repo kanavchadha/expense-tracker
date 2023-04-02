@@ -6,18 +6,13 @@ const getCategoryData = (category) => {
     return investmentCategoryOptions.find(cat => cat.value === category);
 }
 
-const InvestmentCard = ({ id, title, category, startDate, reference, amount, interest, timePeriod, index, editInvestment, deleteInvestment, copyInvestment, extraCardStyles }) => {
+const InvestmentCard = ({ id, title, category, reference, timePeriod, startDate, totalInvested, totalReturns, status, index, editInvestment, deleteInvestment, copyInvestment, showDetails }) => {
     // console.log(title, ': ', new Date(date.split(' ').join('T')));
     return (
         <View style={{
-            width: 300,
-            marginRight: SIZES.padding,
-            marginLeft: index == 0 ? SIZES.padding : 0,
-            marginVertical: SIZES.radius,
-            borderRadius: SIZES.radius,
-            backgroundColor: COLORS.white,
+            ...styles.card,
             ...styles.shadow,
-            ...extraCardStyles
+            marginLeft: index == 0 ? SIZES.padding : 0
         }}>
             <View style={{ flexDirection: 'row', padding: SIZES.padding, alignItems: 'center' }}>
                 <View
@@ -51,28 +46,36 @@ const InvestmentCard = ({ id, title, category, startDate, reference, amount, int
                     <TouchableOpacity onPress={() => editInvestment(id)} style={styles.iconButton}>
                         <FontAwesome name='pencil' size={16} color={COLORS.peach} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => deleteInvestment(id, category)} style={styles.iconButton}>
+                    <TouchableOpacity onPress={() => deleteInvestment(id)} style={styles.iconButton}>
                         <FontAwesome name='trash' size={16} color={COLORS.danger} />
                     </TouchableOpacity>
                 </View>
             </View>
             <View style={{ paddingHorizontal: SIZES.padding }}>
-                {/* Title */}
                 <Text style={{ ...FONTS.h2, color: COLORS.primary, marginBottom: 3, marginTop: -10 }} numberOfLines={1}>{title}</Text>
-                {/* description */}
                 <Text style={{ ...FONTS.body3, color: COLORS.darkgray }} numberOfLines={3}>
                     {reference}
                 </Text>
-                <Text style={{ ...FONTS.body3, color: COLORS.darkgray }} numberOfLines={3}>
-                    Interest: {interest}
-                </Text>
-                <Text style={{ ...FONTS.body3, color: COLORS.darkgray }} numberOfLines={3}>
-                    Time Period: {timePeriod}
-                </Text>
+                <View style={styles.row}>
+                    <Text style={{ ...FONTS.h3, color: getCategoryData(category).color, flex: 0.5 }} numberOfLines={2}>
+                        Time Period: <Text style={{color: COLORS.darkgray}}>{timePeriod}</Text>
+                    </Text>
+                    <Text style={{ ...FONTS.h3, color: getCategoryData(category).color, flex: 0.5 }} numberOfLines={2}>
+                        Status: <Text style={{color: COLORS.darkgray}}>{status === 'true' ? 'Active' : 'Matured'}</Text>
+                    </Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={{ ...FONTS.h3, color: getCategoryData(category).color, flex: 0.5 }} numberOfLines={2}>
+                        Investment: <Text style={{color: COLORS.darkgray}}>{totalInvested}</Text>
+                    </Text>
+                    <Text style={{ ...FONTS.h3, color: getCategoryData(category).color, flex: 0.5 }} numberOfLines={2}>
+                        Returns: <Text style={{color: COLORS.darkgray}}>{totalReturns}</Text>
+                    </Text>
+                </View>
             </View>
-            <TouchableOpacity style={{ flex: 1, justifyContent: 'flex-end' }} disabled={true}>
+            <TouchableOpacity activeOpacity={0.6} onPress={() => showDetails(id)}>
                 <View style={{ ...styles.priceView, backgroundColor: getCategoryData(category).color }}>
-                    <Text style={{ color: COLORS.white, ...FONTS.h3, ...styles.textShadow }}>Amount {amount.toFixed(2)} Rs</Text>
+                    <Text style={{ color: COLORS.white, ...FONTS.h3, ...styles.textShadow }}>Details</Text>
                 </View>
             </TouchableOpacity>
         </View>
@@ -80,6 +83,14 @@ const InvestmentCard = ({ id, title, category, startDate, reference, amount, int
 }
 
 const styles = StyleSheet.create({
+    card: {
+        width: 300,
+        marginRight: SIZES.padding,
+        marginVertical: SIZES.radius,
+        borderRadius: SIZES.radius,
+        backgroundColor: COLORS.white,
+        overflow: 'hidden'
+    },
     shadow: {
         shadowColor: "#000",
         shadowOffset: {
@@ -103,12 +114,19 @@ const styles = StyleSheet.create({
         marginHorizontal: 3
     },
     priceView: {
-        height: 50,
+        padding: 8,
         alignItems: 'center',
         justifyContent: 'center',
+        flex: 1,
         borderBottomStartRadius: SIZES.radius,
         borderBottomEndRadius: SIZES.radius,
-        marginTop: 8
+        marginTop: 5
+    },
+    row: {
+        marginVertical: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
     }
 })
 

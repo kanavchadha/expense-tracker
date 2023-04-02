@@ -25,9 +25,11 @@ export const COLORS = {
     orange: '#f06e11',
     seaGreen: '#13d6d0',
     olive: '#91a688',
-    darkBlue: '#066dd4',
+    darkBlue: '#3e64f0',
+    steelblue: '#4682B4',
     darkYellow: '#e0b02b',
-    babyPurple: '#bd65f7'
+    babyPurple: '#bd65f7',
+    babyPink: '#f291b1'
 };
 
 export const SIZES = {

@@ -80,7 +80,7 @@ const Chart = ({ selectedCategory, setSelectCategoryByName, chartData, colorScal
                     />
                 </Svg>
             }
-            <View style={{ position: 'absolute', top: '42%', left: "42%" }} onTouchEnd={() => setSelectCategoryByName('All')}>
+            <View style={{ position: 'absolute', top: '42%', left: "41%" }} onTouchEnd={() => setSelectCategoryByName('All')}>
                 <Text numberOfLines={1} style={{ ...FONTS.h1, textAlign: 'center', color: COLORS.primary }}>{totalCount}</Text>
                 <Text numberOfLines={1} style={{ ...FONTS.body3, textAlign: 'center', color: COLORS.primary }}>{title}</Text>
             </View>

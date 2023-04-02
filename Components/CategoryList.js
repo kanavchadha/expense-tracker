@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Image, TouchableOpacity, FlatList, Animated } f
 import { COLORS, FONTS, SIZES, icons } from '../constants';
 
 export default CategoryList = ({ setSelectedCategory, selectedCategory, categories, height }) => {
-    const fullHeight = height || 448;
+    const fullHeight = height || 506;
     const [showMoreToggle, setShowMoreToggle] = React.useState(false)
     const categoryListHeightAnimationValue = useRef(new Animated.Value(115)).current;
 

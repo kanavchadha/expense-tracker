@@ -38,7 +38,8 @@ export default OverAllExpenseSummaryModal = ({ modalVisible, setModalVisible }) 
         showToastMessage('Downloading Started...', 'bottom', 'long');
         chartContainer.current.capture().then(uri => {
             console.log('File has been saved to:', uri);
-            shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+            return shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+        }).then((res)=>{
             showToastMessage('Downloading Completed...', 'bottom', 'long');
         }).catch(err => {
             showToastMessage('Download Failed...', 'bottom', 'long');
@@ -59,7 +60,7 @@ export default OverAllExpenseSummaryModal = ({ modalVisible, setModalVisible }) 
                             <>
                                 <SummaryHeader monthlyIncome={monthlyIncome} status={status} totalExpenditure={totalExpenditure.total} summaryDetails={totalExpenditure.details} />
                                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                    <Chart selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={totalExpenditure.count} />
+                                    <Chart title='Expenses' selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={totalExpenditure.count} />
                                 </View>
                                 <ExpenseSummary data={chartData} selectedCategory={category} setSelectedCategory={setCategory} status={status} totalExpenditure={totalExpenditure.details?.paidExpenseTotal} totalIncome={monthlyIncome?.paidAmount} />
                             </>

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../constants';
 
 export default InvestmentSummary = ({ data, selectedCategory, setSelectedCategory, status, totalReturns, totalInvestment }) => {

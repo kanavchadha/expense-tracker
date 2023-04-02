@@ -76,21 +76,17 @@ export const getUnpaidNotificationData = async () => {
         const body = res.rows._array.reduce((content, exp, i) => 
             content += `${i + 1}) name: ${exp.title}, amount: ${exp.amount}, date: ${new Date(exp.date.split(' ')[0]).toDateString()}\n`
         , '')
-        const { trigger, userName, err } = await getNotificationInfo();
-        if (err) throw new Error(err.message);
+        const { trigger, userName } = await getNotificationInfo();
         return {
             notificationContent: {
                 title: `Hii ${userName}, Check Your Pending Expenses`,
-                body: body ? body : 'No Unpaid Expenses :). Good Day!'
+                body: body ? body : 'No Unpaid Expenses :) Good Day!'
             },
             trigger
         }
     } catch (err) {
         console.log('Unable to generate notification content: ', err.message);
-        return {
-            title: 'Good Morning Buddy :)',
-            body: 'Good Day!'
-        }
+        throw err;
     }
 }
 
@@ -111,7 +107,7 @@ async function getNotificationInfo() {
         return { trigger, userName };
     } catch (err) {
         console.log('Error in notificaion data reading: ', err.message);
-        return { err };
+        throw err;
     }
 }
 
@@ -260,6 +256,16 @@ export const generateHtmlForExpenseSearchRes = (expenseList, expensesSummary, da
         </div>   
     `;
     return generateHtmlTemplate('Searched Expenses', body);
+}
+
+export const getUniqueId = (length)=>{
+    const id = Math.random().toString(16).slice(2);
+    if(length){
+        length = length > 12 ? 12 : length;
+        return id.slice(0, length-1);
+    }
+    return id;
+    // return crypto.randomUUID();
 }
 
 export const initDB = async () => {

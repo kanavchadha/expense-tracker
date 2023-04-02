@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { View, Alert, ActivityIndicator, Text } from 'react-native';
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
@@ -8,16 +8,19 @@ import { COLORS, FONTS } from "../constants";
 import { useFocusEffect } from '@react-navigation/native';
 import { showToastMessage, generateHtmlForAllExpenses, generateHtmlForExpenseCategory, generateHtmlTemplate } from "../helpers";
 import { getExpensesCategoryGrouped, updateExpense, removeExpense } from "../DB";
+import InvestmentDetailsModal from "./Investment/InvestmentDetails";
 
 export default IncomingExpenses = ({ selectedCategory, month, setMonth }) => {
     const [allExpenses, setAllExpenses] = useState({});
     const [expenseSummary, setExpenseSummary] = useState([]);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('false');
+    const [selectedInvestmentId, setSelectedInvestmentId] = useState(false);
 
     const onLoad = async () => {
         setLoading(true);
         getExpensesCategoryGrouped(status, month).then(res => {
+            console.log(res);
             setExpenseSummary(res.expenseCategoriesTotal);
             delete res['expenseCategoriesTotal'];
             setAllExpenses(res);
@@ -60,6 +63,7 @@ export default IncomingExpenses = ({ selectedCategory, month, setMonth }) => {
                 updateExpenseList={updateExpenseList}
                 deleteExpense={deleteExpense}
                 setExpensePaid={setExpensePaid}
+                showInvestmentDetails={showInvestmentDetails}
             />
         })
     }
@@ -74,7 +78,7 @@ export default IncomingExpenses = ({ selectedCategory, month, setMonth }) => {
         }))
     }
 
-    const deleteExpense = async (id, category) => {
+    const deleteExpense = async (id) => {
         try {
             const res = await removeExpense(id);
             if (res.rowsAffected !== 1) throw new Error('Error in Deleting Data');
@@ -117,6 +121,10 @@ export default IncomingExpenses = ({ selectedCategory, month, setMonth }) => {
         }
     }
 
+    const showInvestmentDetails = (id)=>{
+        setSelectedInvestmentId(id);
+    }
+
     const summary = getExpenseSummary(selectedCategory);
     return (
         <View>
@@ -135,8 +143,10 @@ export default IncomingExpenses = ({ selectedCategory, month, setMonth }) => {
                             updateExpenseList={updateExpenseList}
                             deleteExpense={deleteExpense}
                             setExpensePaid={setExpensePaid}
+                            showInvestmentDetails={showInvestmentDetails}
                         />
             }
+            <InvestmentDetailsModal id={selectedInvestmentId} setShowDetails={setSelectedInvestmentId} />
         </View>
     )
 }
