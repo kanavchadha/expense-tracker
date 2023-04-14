@@ -31,6 +31,7 @@ const kvp = require("../assets/icons/payment.png");
 const nsc = require("../assets/icons/income.png");
 const mic = require("../assets/icons/wage.png");
 const otherInvestments = require("../assets/icons/diagram.png");
+const gifts = require('../assets/icons/gift.png')
 
 export default {
     back_arrow,
@@ -65,5 +66,6 @@ export default {
     kvp,
     nsc,
     mic,
-    otherInvestments
+    otherInvestments,
+    gifts
 }

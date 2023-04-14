@@ -1,6 +1,6 @@
 import { ToastAndroid } from 'react-native';
-import { init, generateOverallExpenseSummary, getExpenseSummary, getSearchResSummary, getUnpaidExpenses } from './DB';
-import { categoryOptions } from './constants';
+import { init, generateOverallExpenseSummary, getExpenseSummary, getSearchResSummary, getUnpaidExpenses, getInvestmentsSummary, generateOverallInvestmentSummary } from './DB';
+import { categoryOptions, investmentCategoryOptions } from './constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { shareAsync } from 'expo-sharing';
 // import * as Print from 'expo-print';
@@ -12,16 +12,15 @@ export async function processCategoryDataToDisplay(paid, month, all = false) {
     } else {
         res = await generateOverallExpenseSummary(paid);
     }
-    return transformSummaryData(res);
+    return transformExpenseSummaryData(res);
 }
 
 export async function processSearchResToDisplay(status, fromDate, toDate, value) {
     let res = await getSearchResSummary(status, fromDate, toDate, value);
-    return transformSummaryData(res);
-
+    return transformExpenseSummaryData(res);
 }
 
-function transformSummaryData(res) {
+const transformExpenseSummaryData = (res) => {
     res = res.reduce((obj, catSum) => {
         const { category, count, total, status } = catSum;
         obj[category] = { ...obj[category], total: total + (obj[category] ? obj[category].total : 0), count: count + (obj[category] ? obj[category].count : 0) };
@@ -70,34 +69,131 @@ function transformSummaryData(res) {
     return { finalChartData: finalChartData ? finalChartData : [], totalExpense, expenseCount, income, expSumDetail: { paidExpenseCount, paidExpenseTotal, unpaidExpenseCount, unpaidExpenseTotal } };
 }
 
+export async function processInvestmentDataToDisplay(filter, fromDate, toDate, all = false) {
+    let res;
+    if (!all) {
+        res = await getInvestmentsSummary(fromDate, toDate, filter);
+    } else {
+        res = await generateOverallInvestmentSummary(filter);
+    }
+    return transformInvestmentSummaryData(res);
+}
+
+const transformInvestmentSummaryData = (res) => {
+    res = res.reduce((obj, catSum) => {
+        const { category, count, invCount, retCount, totalInvested, totalReturns, isActive } = catSum;
+        obj[category] = {
+            ...obj[category],
+            totalInvested: totalInvested + (obj[category] ? obj[category].totalInvested : 0),
+            totalReturns: totalReturns + (obj[category] ? obj[category].totalReturns : 0),
+            count: count + (obj[category] ? obj[category].count : 0),
+            totalInvCount: invCount + (obj[category] ? obj[category].invCount : 0),
+            totalRetCount: retCount + (obj[category] ? obj[category].retCount : 0)
+        };
+        if (isActive === 'true') {
+            obj[category].activeInvAmount = totalInvested;
+            obj[category].activeInvCount = invCount;
+            obj[category].activeRetAmount = totalReturns;
+            obj[category].activeRetCount = retCount;
+        } else {
+            obj[category].inActiveInvAmount = totalInvested;
+            obj[category].inActiveInvCount = invCount;
+            obj[category].inActiveRetAmount = totalReturns;
+            obj[category].inActiveRetCount = retCount;
+        }
+        return obj;
+    }, {});
+
+    let totalInvested = 0, totalReturns = 0, allInvestmentsCount = 0, allReturnsCount = 0, investmentRecordsCount = 0,
+        activeInvestmentsTotal = 0, inactiveInvestmentsTotal = 0, activeInvestmentsCount = 0, inactiveInvestmentsCount = 0,
+        activeReturnsTotal = 0, inactiveReturnsTotal = 0, activeReturnsCount = 0, inactiveReturnsCount = 0;
+
+    const investmentSummary = Object.keys(res).map(cat => {
+        totalInvested += res[cat].totalInvested;
+        totalReturns += res[cat].totalReturns;
+        allInvestmentsCount += res[cat].totalInvCount;
+        allReturnsCount += res[cat].totalRetCount;
+        investmentRecordsCount += res[cat].count;
+        activeInvestmentsTotal += res[cat].activeInvAmount ? res[cat].activeInvAmount : 0;
+        activeInvestmentsCount += res[cat].activeInvCount ? res[cat].activeInvCount : 0;
+        inactiveInvestmentsTotal += res[cat].inActiveInvAmount ? res[cat].inActiveInvAmount : 0;
+        inactiveInvestmentsCount += res[cat].inActiveInvCount ? res[cat].inActiveInvCount : 0;
+        activeReturnsTotal += res[cat].activeRetAmount ? res[cat].activeRetAmount : 0;
+        activeReturnsCount += res[cat].activeRetCount ? res[cat].activeRetCount : 0;
+        inactiveReturnsTotal += res[cat].inActiveRetAmount ? res[cat].inActiveRetAmount : 0;
+        inactiveReturnsCount += res[cat].inActiveRetCount ? res[cat].inActiveRetCount : 0;
+        return { category: cat, ...res[cat] }
+    });
+
+    const chartGroupData = { data1: [], data2: [] };
+    const finalChartSummary = investmentSummary.map(catSum => {
+        const catData = investmentCategoryOptions.find(co => co.value === catSum.category);
+        const invPercentage = totalInvested ? (catSum.totalInvested / totalInvested * 100).toFixed(0) : 0;
+        const retPercentage = totalReturns ? (catSum.totalReturns / totalReturns * 100).toFixed(0) : 0;
+        chartGroupData.data1.push({x: catSum.category, y: Number(catSum.totalInvested), label: `${invPercentage}%`});
+        chartGroupData.data2.push({x: catSum.category, y: Number(catSum.totalReturns), label: `${retPercentage}%`});
+        return {
+            name: catSum.category,
+            invTotal: Number(catSum.totalInvested),
+            retTotal: Number(catSum.totalReturns),
+            invCount: catSum.totalInvCount,
+            retCount: catSum.totalRetCount,
+            invPercent: `${invPercentage}%`,
+            retPercent: `${retPercentage}%`,
+            recordsCount: catSum.count,
+            color: catData.color,
+            id: catData.id,
+            icon: catData.icon,
+            activeInvAmount: catSum.activeInvAmount,
+            activeInvCount: catSum.activeInvCount,
+            activeRetAmount: catSum.activeRetAmount,
+            activeRetCount: catSum.activeRetCount,
+            inActiveInvAmount: catSum.inActiveInvAmount,
+            inActiveInvCount: catSum.inActiveInvCount,
+            inActiveRetAmount: catSum.inActiveRetAmount,
+            inActiveRetCount: catSum.inActiveRetCount
+        };
+    });
+
+    return {
+        chartGroupData,
+        investmentRecordsCount,
+        finalChartSummary: finalChartSummary ? finalChartSummary : [],
+        investmentSumDetail: {
+            totalInvested, allInvestmentsCount,
+            activeInvestmentsTotal, inactiveInvestmentsTotal, activeInvestmentsCount, inactiveInvestmentsCount
+        },
+        returnSumDetail: {
+            totalReturns,  allReturnsCount,
+            activeReturnsTotal, inactiveReturnsTotal, activeReturnsCount, inactiveReturnsCount
+        }
+    };
+}
+
 export const getUnpaidNotificationData = async () => {
     try {
         const res = await getUnpaidExpenses();
-        const body = res.rows._array.reduce((content, exp, i) => 
+        const body = res.rows._array.reduce((content, exp, i) =>
             content += `${i + 1}) name: ${exp.title}, amount: ${exp.amount}, date: ${new Date(exp.date.split(' ')[0]).toDateString()}\n`
-        , '')
-        const { trigger, userName, err } = await getNotificationInfo();
-        if (err) throw new Error(err.message);
+            , '')
+        const { trigger, userName } = await getNotificationInfo();
         return {
             notificationContent: {
                 title: `Hii ${userName}, Check Your Pending Expenses`,
-                body: body ? body : 'No Unpaid Expenses :). Good Day!'
+                body: body ? body : 'No Unpaid Expenses :) Good Day!'
             },
             trigger
         }
     } catch (err) {
         console.log('Unable to generate notification content: ', err.message);
-        return {
-            title: 'Good Morning Buddy :)',
-            body: 'Good Day!'
-        }
+        throw err;
     }
 }
 
 async function getNotificationInfo() {
     try {
         const userData = await getUserData();
-        const notification = userData?.notification, userName = userData && userData.userName ? userData.userName: 'anonymous';
+        const notification = userData?.notification, userName = userData && userData.userName ? userData.userName : 'anonymous';
         const trigger = new Date();
         if (notification === 'EveryDay') {
             if (trigger.getHours() > 10) trigger.setDate(trigger.getDate() + 1);
@@ -111,7 +207,7 @@ async function getNotificationInfo() {
         return { trigger, userName };
     } catch (err) {
         console.log('Error in notificaion data reading: ', err.message);
-        return { err };
+        throw err;
     }
 }
 
@@ -120,7 +216,7 @@ export const getUserData = async () => {
     return jsonValue != null ? JSON.parse(jsonValue) : null;
 }
 
-export const showToastMessage = (msg, position, duration) => {
+export const showToastMessage = (msg, position, duration = 'long') => {
     if (!msg) return;
 
     if (position === 'top') position = ToastAndroid.TOP;
@@ -260,6 +356,16 @@ export const generateHtmlForExpenseSearchRes = (expenseList, expensesSummary, da
         </div>   
     `;
     return generateHtmlTemplate('Searched Expenses', body);
+}
+
+export const getUniqueId = (length) => {
+    const id = Math.random().toString(16).slice(2);
+    if (length) {
+        length = length > 12 ? 12 : length;
+        return id.slice(0, length - 1);
+    }
+    return id;
+    // return crypto.randomUUID();
 }
 
 export const initDB = async () => {

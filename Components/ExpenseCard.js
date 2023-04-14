@@ -6,8 +6,7 @@ const getCategoryData = (category) => {
     return categoryOptions.find(cat => cat.value === category);
 }
 
-const ExpenseCard = ({ id, title, category, date, description, amount, status, index, editExpense, deleteExpense, copyExpense, setExpensePaid, extraCardStyles }) => {
-    // console.log(title, ': ', new Date(date.split(' ').join('T')));
+const ExpenseCard = ({ id, title, category, date, description, amount, status, index, invId, editExpense, deleteExpense, copyExpense, setExpensePaid, showInvestmentDetails, extraCardStyles }) => {
     return (
         <View style={{
             width: 300,
@@ -45,14 +44,20 @@ const ExpenseCard = ({ id, title, category, date, description, amount, status, i
                     <Text style={{ ...FONTS.body4, color: COLORS.lightBlue }}> {new Date(date.split(' ')[0]).toDateString()} </Text>
                 </View>
                 {/* Actions */}
-                <View style={{ position: 'absolute', right: 10 }}>
+                <View style={{ position: 'absolute', right: 10, top: 5 }}>
+                    {
+                        category === 'Investment' && invId?.toString() &&
+                        <TouchableOpacity onPress={() => showInvestmentDetails(invId)} style={styles.iconButton}>
+                            <FontAwesome name='ellipsis-h' size={16} color={COLORS.blue} />
+                        </TouchableOpacity>
+                    }
                     <TouchableOpacity onPress={() => copyExpense(id)} style={styles.iconButton}>
                         <FontAwesome name='copy' size={16} color={COLORS.darkYellow} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => editExpense(id)} style={styles.iconButton}>
                         <FontAwesome name='pencil' size={16} color={COLORS.peach} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => deleteExpense(id, category)} style={styles.iconButton}>
+                    <TouchableOpacity onPress={() => deleteExpense(id)} style={styles.iconButton}>
                         <FontAwesome name='trash' size={16} color={COLORS.danger} />
                     </TouchableOpacity>
                 </View>

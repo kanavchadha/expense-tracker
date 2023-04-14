@@ -1,4 +1,4 @@
-import { db } from './index';
+import { db } from './db';
 import { investmentCategoryOptions } from '../constants';
 
 export const deleteAllInvestmentData = async () => {
@@ -8,7 +8,7 @@ export const deleteAllInvestmentData = async () => {
                 () => { console.log('Deleted Investment data successfully!'); },
                 (_, err) => { reject(err) },
             );
-            tx.executeSql('CREATE TABLE IF NOT EXISTS investment (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, reference TEXT, category TEXT NOT NULL, amount REAL NOT NULL, startDate TEXT NOT NULL, timePeriod REAL NOT NULL, interest REAL NOT NULL );', [],
+            tx.executeSql('CREATE TABLE IF NOT EXISTS investment (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, reference TEXT, category TEXT NOT NULL, investments TEXT NOT NULL, startDate TEXT NOT NULL, timePeriod REAL NOT NULL, returns TEXT NOT NULL, isActive TEXT NOT NULL, totalInvAmount REAL NOT NULL, totalRetAmount REAL NOT NULL, totalInvCount INTEGER NOT NULL, totalRetCount INTEGER NOT NULL );', [],
                 () => { console.log('Created New Investment Table successfully!'); },
                 (_, err) => { reject(err) },
             );
@@ -20,82 +20,82 @@ export const deleteAllInvestmentData = async () => {
     return promise;
 }
 
-export const insertInvestment = async (title, category, amount, date, reference, time, interest) => {
+export const insertInvestment = async (title, category, reference, time, investments, returns, isActive) => {
+    const startDate = investments[0].date.toISOString();
+    const invTotal = investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0);
+    const retTotal = returns.reduce((val, ret) => (val + (Math.round(Number(ret.amount) * 100) / 100)), 0);
+    const invCount = investments.length;
+    const retCount = returns.length;
+    investments = JSON.stringify(investments);
+    returns = JSON.stringify(returns);
+    isActive = isActive ? 'true' : 'false';
+
     const promise = new Promise((resolve, reject) => {
-        db.transaction((tx) => { // for creating queries. if some part of query fails, it rollback whole query.
-            tx.executeSql(`INSERT INTO investment (title, reference, category, amount, startDate, timePeriod, interest) VALUES (?, ?, ?, ?, datetime(?, 'localtime'), ?, ?);`, // here we insert question marks instead of adding values directly because to prevent sql injection. 
-                [title, reference, category, amount, date, time, interest], // we pass our args here, as it now first validates thse args i.e these args should not be a valid sql statement, and then it will be replaces the ?, hence we can prevent sql injections.
-                (_, result) => { resolve(result) },
+        const res = {};
+        db.transaction((tx) => {
+            tx.executeSql(`INSERT INTO investment (title, reference, category, timePeriod, investments, returns, startDate, isActive, totalInvAmount, totalRetAmount, totalInvCount, totalRetCount) VALUES (?, ?, ?, ?, ?, ?, datetime(?, 'localtime'), ?, ?, ?, ?, ?);`,
+                [title, reference, category, time, investments, returns, startDate, isActive, invTotal, retTotal, invCount, retCount],
+                (_, result) => { res.investment = result },
                 (_, err) => { reject(err) },
             );
-        })
+            // tx.executeSql(`INSERT INTO expense (title, category, amount, date, description, status, invId) VALUES (?, ?, ?, datetime(?, 'localtime'), ?, ?, ?);`,
+            //     [title, 'Investment', invTotal, startDate, reference, 'true', res.investment?.insertId],
+            //     (_, result) => { res.expense = result },
+            //     (_, err) => { reject(err) },
+            // );
+        }, (err) => { reject(err) },
+            () => { resolve(res) }
+        )
     });
     return promise;
 }
 
-export const updateInvestment = async (title, category, amount, date, reference, time, interest, id) => {
+export const updateInvestment = async (title, category, reference, time, investments, returns, isActive, id) => {
+    const startDate = investments[0].date.toISOString();
+    const invTotal = investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0);
+    const retTotal = returns.reduce((val, ret) => (val + (Math.round(Number(ret.amount) * 100) / 100)), 0);
+    const invCount = investments.length;
+    const retCount = returns.length;
+    investments = JSON.stringify(investments);
+    returns = JSON.stringify(returns);
+    isActive = isActive ? 'true' : 'false';
+
     const promise = new Promise((resolve, reject) => {
+        const res = {};
         db.transaction((tx) => {
-            tx.executeSql(`UPDATE investment SET title = ?, category = ?, reference = ?, amount = ?, startDate = datetime(?, 'localtime'), timePeriod = ? interest = ? WHERE id = ?;`,
-                [title, category, reference, amount, date, time, interest, id],
-                (_, result) => { resolve(result) },
+            tx.executeSql(`UPDATE investment SET title = ?, reference = ?, category = ?, timePeriod = ?, investments = ?, returns = ?, startDate = datetime(?, 'localtime'), isActive = ?, totalInvAmount = ?, totalRetAmount = ?, totalInvCount = ?, totalRetCount = ? WHERE id = ?;`,
+                [title, reference, category, time, investments, returns, startDate, isActive, invTotal, retTotal, invCount, retCount, id],
+                (_, result) => { res.investment = result },
                 (_, err) => { reject(err) },
             );
-        })
+            tx.executeSql(`UPDATE expense SET title = ?, category = ?, amount = ?, date = datetime(?, 'localtime'), description = ?, status = ? WHERE invId = ?;`,
+                [title, 'Investment', invTotal, startDate, reference, 'true', id],
+                (_, result) => { res.expense = result },
+                (_, err) => { reject(err) },
+            );
+        }, (err) => { reject(err) },
+            () => { resolve(res) }
+        )
     });
     return promise;
 }
 
 export const removeInvestment = async (id) => {
     const promise = new Promise((resolve, reject) => {
+        const res = {};
         db.transaction((tx) => {
             tx.executeSql(`DELETE FROM investment WHERE id = ?;`,
                 [parseInt(id)],
-                (_, result) => { resolve(result) },
+                (_, result) => { res.investment = result },
                 (_, err) => { reject(err) },
             );
-        })
-    });
-    return promise;
-}
-
-export const getInvestmentsSummary = async (startDate, endDate) => {
-    const promise = new Promise((resolve, reject) => {
-        db.transaction((tx) => {
-            tx.executeSql(`SELECT category, SUM(amount) AS total, COUNT(id) AS count FROM investment WHERE (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) GROUP BY category;`,
-                [startDate, endDate],
-                (_, result) => { resolve(result.rows._array) },
+            tx.executeSql(`DELETE FROM expense WHERE invId = ?;`,
+                [parseInt(id)],
+                (_, result) => { res.expense = result },
                 (_, err) => { reject(err) },
             );
-        })
-    });
-    return promise;
-}
-
-export const getInvestmentsCategoryGrouped = async (startDate, endDate, order) => {
-    const promise = new Promise((resolve, reject) => {
-        const investmentsByCategory = {};
-        db.transaction((tx) => {
-            tx.executeSql(`SELECT category, SUM(amount) AS totalAmount, COUNT(id) AS count FROM investment WHERE julianday(date) >= julianday(?) AND julianday(date) <= julianday(?) GROUP BY category ORDER BY ${order} LIMIT 25 `,
-                [startDate, endDate],
-                (_, result) => { investmentsByCategory.categoryTotal = result.rows._array },
-                (_, err) => { reject(err) },
-            );
-            investmentCategoryOptions.forEach(category => {
-                if (category.value === 'Category') return;
-                tx.executeSql(`SELECT * FROM investment WHERE category = ? AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) ORDER BY ${order} LIMIT 25`,
-                    [category.value, startDate, endDate],
-                    (_, result) => {
-                        if (result.rows && result.rows._array.length > 0) {
-                            investmentsByCategory[category.value] = { category: category.value, investmentList: result.rows._array };
-                        }
-                    },
-                    (_, err) => { reject(err) },
-                );
-            })
-        },
-            (err) => { reject(err) },
-            () => { resolve(investmentsByCategory) }
+        }, (err) => { reject(err) },
+            () => { resolve(res) }
         )
     });
     return promise;
@@ -114,13 +114,103 @@ export const getInvestmentById = async (id) => {
     return promise;
 }
 
-export const getInvestmentsByCategory = async (category, startDate, endDate, limit, offset, order) => {
+export const getInvestmentsByCategory = async (category, startDate, endDate, filter, limit, offset, order) => {
     const promise = new Promise((resolve, reject) => {
         db.transaction((tx) => {
-            let query = `SELECT * FROM investment WHERE category = ? AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) ORDER BY ${order} DESC LIMIT ? OFFSET ?;`;
+            let query = `SELECT * FROM investment WHERE category = ? AND (julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?)) `;
+            if (filter === 'active') {
+                query += `AND isActive = 'true' `;
+            } else if (filter === 'matured') {
+                query += `AND isActive = 'false' `;
+            }
+            query += `ORDER BY ${order} DESC LIMIT ? OFFSET ?;`
             tx.executeSql(query,
                 [category, startDate, endDate, limit, offset],
                 (_, result) => { resolve(result) },
+                (_, err) => { reject(err) },
+            );
+        })
+    });
+    return promise;
+}
+
+export const getInvestmentsCategoryGrouped = async (startDate, endDate, filter, order) => {
+    const promise = new Promise((resolve, reject) => {
+        const investmentsByCategory = {};
+        db.transaction((tx) => {
+            let query = `SELECT * FROM investment WHERE category = ? AND (julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?)) `;
+            let summQuery = `SELECT category, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, COUNT(id) AS count FROM investment WHERE julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?) `;
+            if (filter === 'active') {
+                summQuery += `AND isActive = 'true' `;
+                query += `AND isActive = 'true' `;
+            } else if (filter === 'matured') {
+                summQuery += `AND isActive = 'false' `;
+                query += `AND isActive = 'false' `;
+            }
+            query += `ORDER BY ${order} LIMIT 10;`;
+            summQuery += `GROUP BY category;`;
+
+            tx.executeSql(summQuery,
+                [startDate, endDate],
+                (_, result) => { investmentsByCategory.investmentCategoriesTotal = result.rows._array },
+                (_, err) => { reject(err) },
+            );
+            investmentCategoryOptions.forEach(category => {
+                if (category.value === 'Category') return;
+                tx.executeSql(query,
+                    [category.value, startDate, endDate],
+                    (_, result) => {
+                        if (result.rows && result.rows._array.length > 0)
+                            investmentsByCategory[category.value] = { category: category.value, investmentList: result?.rows?._array };
+                    },
+                    (_, err) => { reject(err) },
+                );
+            })
+        },
+            (err) => { reject(err) },
+            () => { resolve(investmentsByCategory) }
+        )
+    });
+    return promise;
+}
+
+export const getInvestmentsSummary = async (startDate, endDate, filter) => {
+    const promise = new Promise((resolve, reject) => {
+        db.transaction((tx) => {
+            let query = `SELECT category, isActive, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, SUM(totalInvCount) AS invCount, SUM(totalRetCount) AS retCount, COUNT(id) AS count FROM investment WHERE (julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?)) `;
+            if (filter === 'active') {
+                query += `AND isActive = 'true' `;
+            } else if (filter === 'matured') {
+                query += `AND isActive = 'false' `;
+            } else {
+                query += `AND (isActive = 'false' OR isActive = 'true') `;
+            }
+            query += `GROUP BY category, isActive;`;
+            tx.executeSql(query,
+                [startDate, endDate],
+                (_, result) => { resolve(result.rows._array) },
+                (_, err) => { reject(err) },
+            );
+        })
+    });
+    return promise;
+}
+
+export const generateOverallInvestmentSummary = async (filter) => {
+    const promise = new Promise((resolve, reject) => {
+        db.transaction((tx) => {
+            let query = `SELECT category, isActive, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, SUM(totalInvCount) AS invCount, SUM(totalRetCount) AS retCount, COUNT(id) AS count FROM investment WHERE `;
+            if (filter === 'active') {
+                query += `isActive = 'true' `;
+            } else if (filter === 'matured') {
+                query += `isActive = 'false' `;
+            } else {
+                query += `(isActive = 'false' OR isActive = 'true') `;
+            }
+            query += `GROUP BY category, isActive;`;
+            tx.executeSql(query,
+                [],
+                (_, result) => { resolve(result.rows._array) },
                 (_, err) => { reject(err) },
             );
         })

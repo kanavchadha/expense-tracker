@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getExpensesByCategory } from "../DB";
 import ExpenseCard from "./ExpenseCard";
 
-const ExpenseList = ({ expenses, title, expenseCount, expenseTotal, status, month, updateExpenseList, deleteExpense, setExpensePaid }) => {
+const ExpenseList = ({ expenses, title, expenseCount, expenseTotal, status, month, updateExpenseList, deleteExpense, setExpensePaid, showInvestmentDetails }) => {
     const { navigate } = useNavigation();
     const [loading, setLoading] = useState(false);
     const [offset, setOffset] = useState(10);
@@ -34,9 +34,9 @@ const ExpenseList = ({ expenses, title, expenseCount, expenseTotal, status, mont
         navigate('ExpenseForm', { isEditMode: true, id: id, copy: true });
     }
 
-    const onDeleteExpense = async (id, category) => {
+    const onDeleteExpense = async (id) => {
         setLoading(true);
-        await deleteExpense(id, category);
+        await deleteExpense(id);
         setLoading(false);
     }
 
@@ -78,6 +78,8 @@ const ExpenseList = ({ expenses, title, expenseCount, expenseTotal, status, mont
                                 copyExpense={copyExpense}
                                 setExpensePaid={onExpensePaid}
                                 index={index}
+                                invId={item.invId}
+                                showInvestmentDetails={showInvestmentDetails}
                             />
                         }
                         keyExtractor={item => `${item.id}`}

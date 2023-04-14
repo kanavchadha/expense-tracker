@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native'
-import { COLORS, FONTS, SEARCH_FILTERS } from '../constants'
+import { COLORS, FONTS, SEARCH_SORT_OPTIONS } from '../constants'
 import { Ionicons } from '@expo/vector-icons';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -72,30 +72,6 @@ const Search = () => {
         })
         setExpenses(sortedExpenses);
     }, [order]);
-
-    const openDatePicker = (ds) => {
-        DateTimePickerAndroid.open({
-            value: ds === 'to' ? toDate : fromDate,
-            is24Hour: true,
-            timeZoneOffsetInMinutes: -330,
-            onChange: (event, value) => {
-                if (ds === 'to') {
-                    value.setUTCHours(23, 59, 59);
-                    if (value.getTime() < fromDate.getTime()) {
-                        return showToastMessage('Please select valid Input!', 'top', 'long');
-                    }
-                    setToDate(value);
-                } else {
-                    value.setUTCHours(0, 0, 0);
-                    if (toDate.getTime() < value.getTime()) {
-                        return showToastMessage('Please select valid Input!', 'top', 'long');
-                    }
-                    setFromDate(value);
-                }
-                // console.log(value, value.toISOString());
-            }
-        });
-    }
 
     const searchExpenseByDate = async () => {
         setOffset(0);
@@ -242,7 +218,7 @@ const Search = () => {
                             onPressDownload={downloadExpenses}
                             filter={order}
                             setFilter={setOrder}
-                            filters={SEARCH_FILTERS}
+                            filters={SEARCH_SORT_OPTIONS}
                             iconBtn={true}
                             summaryIcon='stats-chart-outline'
                             onPressSummary={() => setModalVisible(true)}
@@ -302,7 +278,8 @@ const SearchResSummary = ({ modalVisible, setModalVisible, expensesSummary, stat
         showToastMessage('Downloading Started...', 'bottom', 'long');
         chartContainer.current.capture().then(uri => {
             console.log('File has been saved to:', uri);
-            shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+            return shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+        }).then((res)=>{
             showToastMessage('Downloading Completed...', 'bottom', 'long');
         }).catch(err => {
             showToastMessage('Download Failed...', 'bottom', 'long');
@@ -327,7 +304,7 @@ const SearchResSummary = ({ modalVisible, setModalVisible, expensesSummary, stat
                             summaryDetails={expensesSummary.expSumDetail}
                         />
                         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            <Chart selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={expensesSummary.expenseCount} />
+                            <Chart title='Expenses' selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={expensesSummary.expenseCount} />
                         </View>
                         <ExpenseSummary data={chartData} selectedCategory={category} setSelectedCategory={setCategory} status={status} totalExpenditure={expensesSummary?.expSumDetail?.paidExpenseTotal} totalIncome={expensesSummary?.income?.paidAmount} />
                     </View>

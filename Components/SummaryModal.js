@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Text, StyleSheet, View, Dimensions, Modal, ScrollView, Image, Alert, ActivityIndicator } from 'react-native'
-import { COLORS, FONTS } from '../constants';
+import { COLORS, FONTS, SIZES } from '../constants';
 import logo from '../assets/icon.png';
 import { showToastMessage, processCategoryDataToDisplay } from '../helpers';
 import OptionsBar from './OptionsBar';
@@ -25,7 +25,7 @@ export default OverAllExpenseSummaryModal = ({ modalVisible, setModalVisible }) 
         processCategoryDataToDisplay(status, null, true).then(res => {
             setChartData(res.finalChartData);
             setColorScales(res.finalChartData.map((item) => item.color));
-            setTotalExpenditure({total: res.totalExpense, count: res.expenseCount, details: res.expSumDetail});
+            setTotalExpenditure({ total: res.totalExpense, count: res.expenseCount, details: res.expSumDetail });
             setMonthlyIncome(res.income);
             setLoading(false);
         }).catch(err => {
@@ -38,7 +38,8 @@ export default OverAllExpenseSummaryModal = ({ modalVisible, setModalVisible }) 
         showToastMessage('Downloading Started...', 'bottom', 'long');
         chartContainer.current.capture().then(uri => {
             console.log('File has been saved to:', uri);
-            shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+            return shareAsync(uri, { UTI: '.png', mimeType: 'application/png' });
+        }).then((res) => {
             showToastMessage('Downloading Completed...', 'bottom', 'long');
         }).catch(err => {
             showToastMessage('Download Failed...', 'bottom', 'long');
@@ -54,17 +55,15 @@ export default OverAllExpenseSummaryModal = ({ modalVisible, setModalVisible }) 
             </View>
             <ScrollView>
                 <ViewShot ref={chartContainer} options={{ format: "png" }}>
-                    <View style={{ flex: 1 }}>
-                        {loading ? <ActivityIndicator size='large' color={COLORS.secondary} /> :
-                            <>
-                                <SummaryHeader monthlyIncome={monthlyIncome} status={status} totalExpenditure={totalExpenditure.total} summaryDetails={totalExpenditure.details} />
-                                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                    <Chart selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={totalExpenditure.count} />
-                                </View>
-                                <ExpenseSummary data={chartData} selectedCategory={category} setSelectedCategory={setCategory} status={status} totalExpenditure={totalExpenditure.details?.paidExpenseTotal} totalIncome={monthlyIncome?.paidAmount} />
-                            </>
-                        }
-                    </View>
+                    {loading ? <ActivityIndicator size='large' color={COLORS.secondary} /> :
+                        <>
+                            <SummaryHeader monthlyIncome={monthlyIncome} status={status} totalExpenditure={totalExpenditure.total} summaryDetails={totalExpenditure.details} />
+                            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                <Chart title='Expenses' selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={totalExpenditure.count} extraTitleStyles={{ left: SIZES.width / 2.88 }} />
+                            </View>
+                            <ExpenseSummary data={chartData} selectedCategory={category} setSelectedCategory={setCategory} status={status} totalExpenditure={totalExpenditure.details?.paidExpenseTotal} totalIncome={monthlyIncome?.paidAmount} />
+                        </>
+                    }
                 </ViewShot>
             </ScrollView>
         </SummaryModal>

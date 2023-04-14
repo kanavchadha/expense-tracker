@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getInvestmentsByCategory } from "../../DB";
 import InvestmentCard from "./InvestmentCard";
 
-const InvestmentList = ({ investments, title, investmentCount, investmentTotal, status, updateInvestmentList, deleteInvestment }) => {
+const InvestmentList = ({ investments, title, investmentCount, totalInvested, totalReturns, status, fromDate, toDate, order, updateInvestmentList, deleteInvestment, showInvestmentDetails }) => {
     const { navigate } = useNavigation();
     const [loading, setLoading] = useState(false);
     const [offset, setOffset] = useState(10);
@@ -15,7 +15,7 @@ const InvestmentList = ({ investments, title, investmentCount, investmentTotal, 
         try {
             console.log('fetching....');
             setLoading(true)
-            const res = await getInvestmentsByCategory(title, 10, offset, status, month);
+            const res = await getInvestmentsByCategory(title, fromDate.toISOString(), toDate.toISOString(), status, 10, offset, order);
             updateInvestmentList(title, res.rows._array);
             if (res.rows._array.length > 0) setOffset(prevState => prevState + 10);
             setLoading(false);
@@ -24,7 +24,6 @@ const InvestmentList = ({ investments, title, investmentCount, investmentTotal, 
             Alert.alert('Something went wrong!', 'Error occured while reading data. ' + err.message);
         }
     }
-
 
     const editInvestment = async (id) => {
         navigate('InvestmentForm', { isEditMode: true, id: id });
@@ -46,11 +45,14 @@ const InvestmentList = ({ investments, title, investmentCount, investmentTotal, 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text style={{ ...FONTS.h3, color: COLORS.primary }}>{title}</Text>
                     {loading ? <ActivityIndicator size='small' color={COLORS.secondary} /> :
-                        <Text style={{ ...FONTS.body3, color: COLORS.darkgreen }}>{investmentTotal}</Text>
+                        <Text style={{ ...FONTS.body4, color: COLORS.blue }}>{investmentCount} Total</Text>
                     }
                 </View>
                 {loading ? <ActivityIndicator size='small' color={COLORS.secondary} style={{ alignSelf: 'flex-start' }} /> :
-                    <Text style={{ ...FONTS.body4, color: COLORS.darkgray }}>{investmentCount} Total</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{ ...FONTS.body4, color: COLORS.danger, marginRight: 5 }} numberOfLines={1}>{totalInvested}Rs TotalInvested</Text>
+                        <Text style={{ ...FONTS.body4, color: COLORS.darkgreen }} numberOfLines={1}>{totalReturns}Rs TotalReturned</Text>
+                    </View>
                 }
             </View>
             {
@@ -63,14 +65,16 @@ const InvestmentList = ({ investments, title, investmentCount, investmentTotal, 
                                 id={item.id}
                                 title={item.title}
                                 category={item.category}
-                                startDate={item.startDate}
-                                amount={item.amount}
                                 reference={item.reference}
-                                interest={item.interest}
                                 timePeriod={item.timePeriod}
+                                startDate={item.startDate}
+                                status={item.isActive}
+                                totalInvested={item.totalInvAmount}
+                                totalReturns={item.totalRetAmount}
                                 editInvestment={editInvestment}
                                 deleteInvestment={onDeleteInvestment}
                                 copyInvestment={copyInvestment}
+                                showDetails={showInvestmentDetails}
                                 index={index}
                             />
                         }

@@ -42,7 +42,7 @@ const DateRange = ({ fromDate, toDate, setFromDate, setToDate }) => {
                     </View>
                 </View>
             </TouchableOpacity>
-            <Ionicons name='arrow-forward-sharp' size={28} color={COLORS.secondary} style={{ paddingHorizontal: 4, marginTop: 15 }} />
+            <Ionicons name='arrow-forward-sharp' size={26} color={COLORS.secondary} style={{ paddingHorizontal: 4, marginTop: 15 }} />
             <TouchableOpacity onPress={() => openDatePicker('to')} activeOpacity={0.8} style={{ flex: 1 }}>
                 <View>
                     <Text style={styles.dateLabel}>To: </Text>
