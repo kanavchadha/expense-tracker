@@ -58,7 +58,7 @@ export default function ExpenseCharts({ selectedCategory, setSelectedCategory, m
                     <>
                         <SummaryHeader monthlyIncome={monthlyIncome} status={status} totalExpenditure={totalExpenditure.total} summaryDetails={totalExpenditure.details} />
                         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            <Chart title='Expenses' selectedCategory={selectedCategory} setSelectCategoryByName={setSelectedCategory} chartData={chartData} colorScales={colorScales} totalCount={totalExpenditure.count} />
+                            <Chart title='Expenses' selectedCategory={selectedCategory} setSelectCategoryByName={setSelectedCategory} chartData={chartData} colorScales={colorScales} totalCount={totalExpenditure.count} extraTitleStyles={{}} />
                         </View>
                         <ExpenseSummary data={chartData} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} status={status} totalExpenditure={totalExpenditure.details?.paidExpenseTotal} totalIncome={monthlyIncome?.paidAmount} />
                     </>

@@ -14,8 +14,8 @@ const InvestmentForm = () => {
   const [title, setTitle] = useState('');
   const [reference, setReference] = useState('');
   const [timePeriod, setTimePeriod] = useState('');
-  const [investments, setInvestments] = useState([{ id: getUniqueId(8), date: new Date(), amount: '', interest: '' }]);
-  const [returns, setReturns] = useState([{ id: getUniqueId(8), date: new Date(), amount: '' }]);
+  const [investments, setInvestments] = useState([]);
+  const [returns, setReturns] = useState([]);
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -133,8 +133,9 @@ const InvestmentForm = () => {
   }
 
   const submit = async () => {
-    if (!title || !category || category === 'Category' || investments?.length <= 0 || returns?.length <= 0 || !timePeriod) {
+    if (!title || !category || category === 'Category' || investments?.length <= 0 || !timePeriod) {
       showToastMessage('Please Fill all the Fields Correctly!', 'top');
+      if(investments.length === 0) showToastMessage('Please add atleast 1 investment!', 'top');
       throw new Error('Please Fill all the Fields');
     }
     if (isEditMode && !copy) {
@@ -144,6 +145,7 @@ const InvestmentForm = () => {
       return;
     }
     const res = await insertInvestment(title, category, reference, timePeriod, investments, returns, isActive);
+    if(!res) throw new Error('Something went wrong!');
     res.expense = await insertExpense(title, 'Investment', investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0), investments[0].date.toISOString(), reference, 'true', res.investment?.insertId);
     if (res.investment.rowsAffected !== 1 || res.expense.rowsAffected !== 1) throw new Error('Error in Saving Data');
     goBack();

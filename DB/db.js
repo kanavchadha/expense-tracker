@@ -10,7 +10,7 @@ export const init = async () => {
                 () => { console.log('Created Expense Table successfully!'); },
                 (_, err) => { reject(err) },
             );
-            tx.executeSql('CREATE TABLE IF NOT EXISTS investment (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, reference TEXT, category TEXT NOT NULL, investments TEXT NOT NULL, startDate TEXT NOT NULL, timePeriod REAL NOT NULL, returns TEXT NOT NULL, isActive TEXT NOT NULL, totalInvAmount REAL NOT NULL, totalRetAmount REAL NOT NULL );',
+            tx.executeSql('CREATE TABLE IF NOT EXISTS investment (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, reference TEXT, category TEXT NOT NULL, investments TEXT NOT NULL, startDate TEXT NOT NULL, timePeriod REAL NOT NULL, returns TEXT NOT NULL, isActive TEXT NOT NULL, totalInvAmount REAL NOT NULL, totalRetAmount REAL NOT NULL, totalInvCount INTEGER NOT NULL, totalRetCount INTEGER NOT NULL );',
                 [],
                 () => { console.log('Created Investment Table successfully!'); },
                 (_, err) => { reject(err) },
@@ -38,7 +38,7 @@ export const clearDB = async () => {
                 () => { console.log('Deleted Investment data successfully!'); },
                 (_, err) => { reject(err) },
             );
-            tx.executeSql('CREATE TABLE IF NOT EXISTS investment (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, reference TEXT, category TEXT NOT NULL, investments TEXT NOT NULL, startDate TEXT NOT NULL, timePeriod REAL NOT NULL, returns TEXT NOT NULL, isActive TEXT NOT NULL, totalInvAmount REAL NOT NULL, totalRetAmount REAL NOT NULL );', [],
+            tx.executeSql('CREATE TABLE IF NOT EXISTS investment (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, reference TEXT, category TEXT NOT NULL, investments TEXT NOT NULL, startDate TEXT NOT NULL, timePeriod REAL NOT NULL, returns TEXT NOT NULL, isActive TEXT NOT NULL, totalInvAmount REAL NOT NULL, totalRetAmount REAL NOT NULL, totalInvCount INTEGER NOT NULL, totalRetCount INTEGER NOT NULL );', [],
                 () => { console.log('Created New Investment Table successfully!'); },
                 (_, err) => { reject(err) },
             );

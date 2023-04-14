@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SummaryModal } from '../SummaryModal';
 import { getInvestmentById } from '../../DB';
-import { FontAwesome } from '@expo/vector-icons';
 import { COLORS, FONTS, SIZES, investmentCategoryOptions } from '../../constants';
 
 const getCategoryData = (category) => {

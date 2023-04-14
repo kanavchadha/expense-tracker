@@ -8,7 +8,7 @@ export const deleteAllInvestmentData = async () => {
                 () => { console.log('Deleted Investment data successfully!'); },
                 (_, err) => { reject(err) },
             );
-            tx.executeSql('CREATE TABLE IF NOT EXISTS investment (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, reference TEXT, category TEXT NOT NULL, investments TEXT NOT NULL, startDate TEXT NOT NULL, timePeriod REAL NOT NULL, returns TEXT NOT NULL, isActive TEXT NOT NULL, totalInvAmount REAL NOT NULL, totalRetAmount REAL NOT NULL );', [],
+            tx.executeSql('CREATE TABLE IF NOT EXISTS investment (id INTEGER PRIMARY KEY NOT NULL, title  TEXT NOT NULL, reference TEXT, category TEXT NOT NULL, investments TEXT NOT NULL, startDate TEXT NOT NULL, timePeriod REAL NOT NULL, returns TEXT NOT NULL, isActive TEXT NOT NULL, totalInvAmount REAL NOT NULL, totalRetAmount REAL NOT NULL, totalInvCount INTEGER NOT NULL, totalRetCount INTEGER NOT NULL );', [],
                 () => { console.log('Created New Investment Table successfully!'); },
                 (_, err) => { reject(err) },
             );
@@ -22,8 +22,10 @@ export const deleteAllInvestmentData = async () => {
 
 export const insertInvestment = async (title, category, reference, time, investments, returns, isActive) => {
     const startDate = investments[0].date.toISOString();
-    const invTotal = investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0)
+    const invTotal = investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0);
     const retTotal = returns.reduce((val, ret) => (val + (Math.round(Number(ret.amount) * 100) / 100)), 0);
+    const invCount = investments.length;
+    const retCount = returns.length;
     investments = JSON.stringify(investments);
     returns = JSON.stringify(returns);
     isActive = isActive ? 'true' : 'false';
@@ -31,8 +33,8 @@ export const insertInvestment = async (title, category, reference, time, investm
     const promise = new Promise((resolve, reject) => {
         const res = {};
         db.transaction((tx) => {
-            tx.executeSql(`INSERT INTO investment (title, reference, category, timePeriod, investments, returns, startDate, isActive, totalInvAmount, totalRetAmount) VALUES (?, ?, ?, ?, ?, ?, datetime(?, 'localtime'), ?, ?, ?);`,
-                [title, reference, category, time, investments, returns, startDate, isActive, invTotal, retTotal],
+            tx.executeSql(`INSERT INTO investment (title, reference, category, timePeriod, investments, returns, startDate, isActive, totalInvAmount, totalRetAmount, totalInvCount, totalRetCount) VALUES (?, ?, ?, ?, ?, ?, datetime(?, 'localtime'), ?, ?, ?, ?, ?);`,
+                [title, reference, category, time, investments, returns, startDate, isActive, invTotal, retTotal, invCount, retCount],
                 (_, result) => { res.investment = result },
                 (_, err) => { reject(err) },
             );
@@ -52,6 +54,8 @@ export const updateInvestment = async (title, category, reference, time, investm
     const startDate = investments[0].date.toISOString();
     const invTotal = investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0);
     const retTotal = returns.reduce((val, ret) => (val + (Math.round(Number(ret.amount) * 100) / 100)), 0);
+    const invCount = investments.length;
+    const retCount = returns.length;
     investments = JSON.stringify(investments);
     returns = JSON.stringify(returns);
     isActive = isActive ? 'true' : 'false';
@@ -59,8 +63,8 @@ export const updateInvestment = async (title, category, reference, time, investm
     const promise = new Promise((resolve, reject) => {
         const res = {};
         db.transaction((tx) => {
-            tx.executeSql(`UPDATE investment SET title = ?, reference = ?, category = ?, timePeriod = ?, investments = ?, returns = ?, startDate = datetime(?, 'localtime'), isActive = ?, totalInvAmount = ?, totalRetAmount = ?  WHERE id = ?;`,
-                [title, reference, category, time, investments, returns, startDate, isActive, invTotal, retTotal, id],
+            tx.executeSql(`UPDATE investment SET title = ?, reference = ?, category = ?, timePeriod = ?, investments = ?, returns = ?, startDate = datetime(?, 'localtime'), isActive = ?, totalInvAmount = ?, totalRetAmount = ?, totalInvCount = ?, totalRetCount = ? WHERE id = ?;`,
+                [title, reference, category, time, investments, returns, startDate, isActive, invTotal, retTotal, invCount, retCount, id],
                 (_, result) => { res.investment = result },
                 (_, err) => { reject(err) },
             );
@@ -137,11 +141,11 @@ export const getInvestmentsCategoryGrouped = async (startDate, endDate, filter, 
             let query = `SELECT * FROM investment WHERE category = ? AND (julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?)) `;
             let summQuery = `SELECT category, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, COUNT(id) AS count FROM investment WHERE julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?) `;
             if (filter === 'active') {
-                summQuery += `AND isActive = true `;
-                query += `AND isActive = true `;
+                summQuery += `AND isActive = 'true' `;
+                query += `AND isActive = 'true' `;
             } else if (filter === 'matured') {
-                summQuery += `AND isActive = false `;
-                query += `AND isActive = false `;
+                summQuery += `AND isActive = 'false' `;
+                query += `AND isActive = 'false' `;
             }
             query += `ORDER BY ${order} LIMIT 10;`;
             summQuery += `GROUP BY category;`;
@@ -173,7 +177,7 @@ export const getInvestmentsCategoryGrouped = async (startDate, endDate, filter, 
 export const getInvestmentsSummary = async (startDate, endDate, filter) => {
     const promise = new Promise((resolve, reject) => {
         db.transaction((tx) => {
-            let query = `SELECT category, isActive, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, COUNT(id) AS count FROM investment WHERE (julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?)) `;
+            let query = `SELECT category, isActive, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, SUM(totalInvCount) AS invCount, SUM(totalRetCount) AS retCount, COUNT(id) AS count FROM investment WHERE (julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?)) `;
             if (filter === 'active') {
                 query += `AND isActive = 'true' `;
             } else if (filter === 'matured') {
@@ -195,14 +199,15 @@ export const getInvestmentsSummary = async (startDate, endDate, filter) => {
 export const generateOverallInvestmentSummary = async (filter) => {
     const promise = new Promise((resolve, reject) => {
         db.transaction((tx) => {
-            let query = `SELECT category, isActive, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, COUNT(id) AS count FROM investment WHERE `;
+            let query = `SELECT category, isActive, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, SUM(totalInvCount) AS invCount, SUM(totalRetCount) AS retCount, COUNT(id) AS count FROM investment WHERE `;
             if (filter === 'active') {
                 query += `isActive = 'true' `;
             } else if (filter === 'matured') {
                 query += `isActive = 'false' `;
+            } else {
+                query += `(isActive = 'false' OR isActive = 'true') `;
             }
             query += `GROUP BY category, isActive;`;
-
             tx.executeSql(query,
                 [],
                 (_, result) => { resolve(result.rows._array) },

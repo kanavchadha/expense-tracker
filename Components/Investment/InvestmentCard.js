@@ -7,7 +7,6 @@ const getCategoryData = (category) => {
 }
 
 const InvestmentCard = ({ id, title, category, reference, timePeriod, startDate, totalInvested, totalReturns, status, index, editInvestment, deleteInvestment, copyInvestment, showDetails }) => {
-    // console.log(title, ': ', new Date(date.split(' ').join('T')));
     return (
         <View style={{
             ...styles.card,

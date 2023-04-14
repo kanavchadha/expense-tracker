@@ -7,7 +7,6 @@ const getCategoryData = (category) => {
 }
 
 const ExpenseCard = ({ id, title, category, date, description, amount, status, index, invId, editExpense, deleteExpense, copyExpense, setExpensePaid, showInvestmentDetails, extraCardStyles }) => {
-    // console.log(title, ': ', new Date(date.split(' ').join('T')));
     return (
         <View style={{
             width: 300,

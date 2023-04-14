@@ -1,15 +1,17 @@
 import React, { useState, useLayoutEffect } from "react";
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import DateRange from '../Components/DateRange';
 import Investments from '../Components/Investment/Investments';
 import InvestmentCharts from '../Components/Investment/InvestmentCharts';
 import CategoryHeader from '../Components/CategoryHeader';
 import CategoryList from '../Components/CategoryList';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import InvestmentOverallSummaryModal from "../Components/Investment/InvestmentOverallSummary";
 import { COLORS, FONTS, investmentCategoryOptions } from "../constants";
 
 const CURR_DATE = new Date();
 const CURR_END_DATE = new Date();
+CURR_DATE.setDate(1);
 CURR_DATE.setUTCHours(0, 0, 0);
 CURR_END_DATE.setMonth(CURR_DATE.getMonth() + 1);
 CURR_END_DATE.setDate(0);
@@ -21,23 +23,20 @@ const Investment = ({ navigation }) => {
     const [toDate, setToDate] = useState(CURR_END_DATE);
     const [status, setStatus] = useState('all');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [modalVisible, setModalVisible] = useState(false);
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: 'My Investments',
+            headerTitle: () =>
+                <TouchableOpacity activeOpacity={0.5} onPress={()=>setModalVisible(true)}>
+                    <Text style={{ ...FONTS.h2, color: COLORS.white }}> My Investments <MaterialCommunityIcons name="chart-line-variant" size={25} color={COLORS.white} /></Text>
+                </TouchableOpacity>,
             headerShown: true,
             headerStyle: {
                 backgroundColor: COLORS.blue,
             },
             headerTitleAlign: 'center',
             headerTintColor: '#fff',
-            headerTitleStyle: {
-                fontSize: FONTS.h2.fontSize,
-                fontFamily: FONTS.h1.fontFamily
-            },
-            headerLeft: () => (
-                <Ionicons name="arrow-back-sharp" size={30} color='#fff' onPress={() => navigation.goBack()} />
-            ),
             headerRight: () => (
                 <Ionicons name='add-circle-outline' size={30} color='#fff' onPress={() => navigation.navigate('InvestmentForm', {})} />
             ),
@@ -61,6 +60,7 @@ const Investment = ({ navigation }) => {
                     <InvestmentCharts selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} fromDate={fromDate} toDate={toDate} status={status} setStatus={setStatus} />
                 }
             </ScrollView>
+            {modalVisible && <InvestmentOverallSummaryModal filter={status} setFilter={setStatus} modalVisible={modalVisible} setModalVisible={setModalVisible} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory}  />}
         </View>
     )
 }

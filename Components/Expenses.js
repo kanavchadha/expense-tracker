@@ -20,7 +20,6 @@ export default IncomingExpenses = ({ selectedCategory, month, setMonth }) => {
     const onLoad = async () => {
         setLoading(true);
         getExpensesCategoryGrouped(status, month).then(res => {
-            console.log(res);
             setExpenseSummary(res.expenseCategoriesTotal);
             delete res['expenseCategoriesTotal'];
             setAllExpenses(res);

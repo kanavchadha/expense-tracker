@@ -54,10 +54,12 @@ export const INVESTMENT_FILTERS = [
 export const INVESTMENT_SORT_OPTIONS = [
     {id: '0', label: 'Newest First', value: 'id DESC'},
     {id: '1', label: 'Oldest First', value: 'id ASC'},
-    {id: '2', label: 'Amount-Low->High', value: 'amount ASC'},
-    {id: '3', label: 'Amount-High->Low', value: 'amount DESC'},
-    {id: '4', label: 'Date ASC', value: 'date ASC'},
-    {id: '5', label: 'Date DESC', value: 'date DESC'},
+    {id: '2', label: 'Investment Amount Low->High', value: 'totalInvAmount ASC'},
+    {id: '3', label: 'Investment Amount High->Low', value: 'totalInvAmount DESC'},
+    {id: '4', label: 'Return Amount Low->High', value: 'totalRetAmount ASC'},
+    {id: '5', label: 'Return Amount High->Low', value: 'totalRetAmount DESC'},
+    {id: '6', label: 'Date ASC', value: 'startDate ASC'},
+    {id: '7', label: 'Date DESC', value: 'startDate DESC'},
 ];
 
 export const investmentCategoryOptions = [

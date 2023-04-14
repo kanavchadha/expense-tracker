@@ -32,7 +32,7 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
     useFocusEffect(
         useCallback(() => {
             onLoad();
-        }, [status, fromDate.toISOString(), toDate.toISOString()])
+        }, [status, order, fromDate.toISOString(), toDate.toISOString()])
     );
 
     const getInvestmentSummary = (category) => {
