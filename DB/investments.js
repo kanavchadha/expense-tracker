@@ -134,12 +134,12 @@ export const getInvestmentsByCategory = async (category, startDate, endDate, fil
     return promise;
 }
 
-export const getInvestmentsCategoryGrouped = async (startDate, endDate, filter, order) => {
+export const getInvestmentsCategoryGrouped = async (startDate, endDate, filter, order, limit = 10, withSumm = true) => {
     const promise = new Promise((resolve, reject) => {
         const investmentsByCategory = {};
         db.transaction((tx) => {
             let query = `SELECT * FROM investment WHERE category = ? AND (julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?)) `;
-            let summQuery = `SELECT category, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, COUNT(id) AS count FROM investment WHERE julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?) `;
+            let summQuery = `SELECT category, SUM(totalInvAmount) AS totalInvested, SUM(totalRetAmount) AS totalReturns, SUM(totalInvCount) AS invCount, SUM(totalRetCount) AS retCount, COUNT(id) AS count FROM investment WHERE julianday(startDate) >= julianday(?) AND julianday(startDate) <= julianday(?) `;
             if (filter === 'active') {
                 summQuery += `AND isActive = 'true' `;
                 query += `AND isActive = 'true' `;
@@ -147,18 +147,21 @@ export const getInvestmentsCategoryGrouped = async (startDate, endDate, filter, 
                 summQuery += `AND isActive = 'false' `;
                 query += `AND isActive = 'false' `;
             }
-            query += `ORDER BY ${order} LIMIT 10;`;
+            query += `ORDER BY ${order} LIMIT ?;`;
             summQuery += `GROUP BY category;`;
 
-            tx.executeSql(summQuery,
-                [startDate, endDate],
-                (_, result) => { investmentsByCategory.investmentCategoriesTotal = result.rows._array },
-                (_, err) => { reject(err) },
-            );
+            if (withSumm) {
+                tx.executeSql(summQuery,
+                    [startDate, endDate],
+                    (_, result) => { investmentsByCategory.investmentCategoriesTotal = result.rows._array },
+                    (_, err) => { reject(err) },
+                );
+            }
+
             investmentCategoryOptions.forEach(category => {
                 if (category.value === 'Category') return;
                 tx.executeSql(query,
-                    [category.value, startDate, endDate],
+                    [category.value, startDate, endDate, limit],
                     (_, result) => {
                         if (result.rows && result.rows._array.length > 0)
                             investmentsByCategory[category.value] = { category: category.value, investmentList: result?.rows?._array };

@@ -46,7 +46,7 @@ export const updateExpense = async (title, category, amount, date, description, 
     return promise;
 }
 
-export const getExpensesCategoryGrouped = async (status = 'false', month = null) => {
+export const getExpensesCategoryGrouped = async (status = 'false', month = null, limit = 10, withSumm = true) => {
     const promise = new Promise((resolve, reject) => {
         const expensesByCategory = {};
         const monthDate = getMonthStartEndDate(month);
@@ -57,19 +57,21 @@ export const getExpensesCategoryGrouped = async (status = 'false', month = null)
                 status = 'false';
                 query = `SELECT category, SUM(amount) AS totalAmount, COUNT(id) AS count FROM expense WHERE (status = ? OR status = 'true') AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) GROUP BY category;`
             }
-            tx.executeSql(query,
-                [status, monthDate.startDate, monthDate.endDate],
-                (_, result) => { expensesByCategory.expenseCategoriesTotal = result.rows._array },
-                (_, err) => { reject(err) },
-            );
+            if (withSumm) {
+                tx.executeSql(query,
+                    [status, monthDate.startDate, monthDate.endDate],
+                    (_, result) => { expensesByCategory.expenseCategoriesTotal = result.rows._array },
+                    (_, err) => { reject(err) },
+                );
+            }
             categoryOptions.forEach(category => {
                 if (category.value === 'Category') return;
-                let query2 = `SELECT * FROM expense WHERE category = ? AND status = ? AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) ORDER BY id DESC LIMIT 10;`;
+                let query2 = `SELECT * FROM expense WHERE category = ? AND status = ? AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) ORDER BY id DESC LIMIT ?;`;
                 if (status2 === 'all') {
-                    query2 = `SELECT * FROM expense WHERE category = ? AND (status = ? OR status = 'true') AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) ORDER BY id DESC LIMIT 10;`;
+                    query2 = `SELECT * FROM expense WHERE category = ? AND (status = ? OR status = 'true') AND (julianday(date) >= julianday(?) AND julianday(date) <= julianday(?)) ORDER BY id DESC LIMIT ?;`;
                 }
                 tx.executeSql(query2,
-                    [category.value, status, monthDate.startDate, monthDate.endDate],
+                    [category.value, status, monthDate.startDate, monthDate.endDate, limit],
                     (_, result) => {
                         if (result.rows && result.rows._array.length > 0) {
                             expensesByCategory[category.value] = { category: category.value, expenseList: result.rows._array };

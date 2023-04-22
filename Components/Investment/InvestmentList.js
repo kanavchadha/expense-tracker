@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getInvestmentsByCategory } from "../../DB";
 import InvestmentCard from "./InvestmentCard";
 
-const InvestmentList = ({ investments, title, investmentCount, totalInvested, totalReturns, status, fromDate, toDate, order, updateInvestmentList, deleteInvestment, showInvestmentDetails }) => {
+const InvestmentList = ({ investments, title, count, invCount, retCount, totalInvested, totalReturns, status, fromDate, toDate, order, updateInvestmentList, deleteInvestment, showInvestmentDetails }) => {
     const { navigate } = useNavigation();
     const [loading, setLoading] = useState(false);
     const [offset, setOffset] = useState(10);
@@ -45,13 +45,13 @@ const InvestmentList = ({ investments, title, investmentCount, totalInvested, to
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text style={{ ...FONTS.h3, color: COLORS.primary }}>{title}</Text>
                     {loading ? <ActivityIndicator size='small' color={COLORS.secondary} /> :
-                        <Text style={{ ...FONTS.body4, color: COLORS.blue }}>{investmentCount} Total</Text>
+                        <Text style={{ ...FONTS.body4, color: COLORS.blue }}>{count} Total</Text>
                     }
                 </View>
                 {loading ? <ActivityIndicator size='small' color={COLORS.secondary} style={{ alignSelf: 'flex-start' }} /> :
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ ...FONTS.body4, color: COLORS.danger, marginRight: 5 }} numberOfLines={1}>{totalInvested}Rs TotalInvested</Text>
-                        <Text style={{ ...FONTS.body4, color: COLORS.darkgreen }} numberOfLines={1}>{totalReturns}Rs TotalReturned</Text>
+                        <Text style={{ ...FONTS.body4, color: COLORS.danger, marginRight: 5 }} numberOfLines={1}>({invCount}) {totalInvested}Rs Invested</Text>
+                        <Text style={{ ...FONTS.body4, color: COLORS.darkgreen }} numberOfLines={1}>({retCount}) {totalReturns}Rs Returned</Text>
                     </View>
                 }
             </View>

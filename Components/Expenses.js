@@ -6,7 +6,7 @@ import ExpenseList from "./ExpenseList";
 import OptionsBar from "./OptionsBar";
 import { COLORS, FONTS } from "../constants";
 import { useFocusEffect } from '@react-navigation/native';
-import { showToastMessage, generateHtmlForAllExpenses, generateHtmlForExpenseCategory, generateHtmlTemplate } from "../helpers";
+import { showToastMessage, generateHtmlForAllExpenses, generateHtmlForExpenseCategory, generateExpenseHtmlTemplate } from "../helpers";
 import { getExpensesCategoryGrouped, updateExpense, removeExpense } from "../DB";
 import InvestmentDetailsModal from "./Investment/InvestmentDetails";
 
@@ -104,11 +104,14 @@ export default IncomingExpenses = ({ selectedCategory, month, setMonth }) => {
         try {
             showToastMessage('Downloading Started...', 'bottom', 'short');
             let html = '';
+            const allExpensesData = await getExpensesCategoryGrouped(status, month, 500, false);
             if (selectedCategory && selectedCategory !== 'All') {
-                const body = generateHtmlForExpenseCategory(allExpenses[selectedCategory].expenseList, getExpenseSummary(selectedCategory), selectedCategory);
-                html = generateHtmlTemplate('My Expenses', body, status, month);
+                if (!allExpensesData[selectedCategory]) return showToastMessage('No Data!', 'bottom', 'short');
+                const body = generateHtmlForExpenseCategory(allExpensesData[selectedCategory].expenseList, getExpenseSummary(selectedCategory), selectedCategory);
+                html = generateExpenseHtmlTemplate('My Expenses', body, status, month);
             } else {
-                html = generateHtmlForAllExpenses(allExpenses, expenseSummary, status, month);
+                if (Object.keys(allExpensesData).length <= 0) return showToastMessage('No Data!', 'bottom', 'short');
+                html = generateHtmlForAllExpenses(allExpensesData, expenseSummary, status, month);
             }
             const { uri } = await Print.printToFileAsync({ html });
             console.log('File has been saved to:', uri);
@@ -120,7 +123,7 @@ export default IncomingExpenses = ({ selectedCategory, month, setMonth }) => {
         }
     }
 
-    const showInvestmentDetails = (id)=>{
+    const showInvestmentDetails = (id) => {
         setSelectedInvestmentId(id);
     }
 
