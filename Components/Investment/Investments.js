@@ -3,11 +3,13 @@ import { View, Text, ActivityIndicator, Alert } from 'react-native';
 import InvestmentList from './InvestmentList';
 import OptionsBar from "../OptionsBar";
 import { getInvestmentsCategoryGrouped, removeInvestment } from "../../DB";
-import { generateHtmlTemplate, showToastMessage } from "../../helpers";
+import { generateHtmlForAllInvestments, generateHtmlForInvestmentCategory, generateInvestmentsHtmlTemplate, showToastMessage } from "../../helpers";
 import { INVESTMENT_FILTERS, INVESTMENT_SORT_OPTIONS } from "../../constants/data";
 import { useFocusEffect } from "@react-navigation/native";
 import { COLORS, FONTS } from "../../constants";
 import InvestmentDetailsModal from "./InvestmentDetails";
+import * as Print from 'expo-print';
+import { shareAsync } from 'expo-sharing';
 
 const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) => {
     const [allInvestments, setAllInvestments] = useState({});
@@ -54,7 +56,9 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
                 key={category}
                 investments={allInvestments[category].investmentList}
                 title={category}
-                investmentCount={catSummary ? catSummary.count : 0}
+                count={catSummary ? catSummary.count : 0}
+                invCount={catSummary ? catSummary.invCount : 0}
+                retCount={catSummary ? catSummary.retCount : 0}
                 totalInvested={catSummary ? catSummary.totalInvested : 0}
                 totalReturns={catSummary ? catSummary.totalReturns : 0}
                 fromDate={fromDate}
@@ -91,19 +95,22 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
         }
     }
 
-    const showInvestmentDetails = (id)=>{
+    const showInvestmentDetails = (id) => {
         setSelectedInvestmentId(id);
     }
 
     const downloadAllInvestment = async () => {
         try {
             showToastMessage('Downloading Started...', 'bottom', 'short');
+            const allInvestmentsData = await getInvestmentsCategoryGrouped(fromDate.toISOString(), toDate.toISOString(), status, order, 500, false);
             let html = '';
             if (selectedCategory && selectedCategory !== 'All') {
-                const body = generateHtmlForInvestmentCategory(allInvestments[selectedCategory].investmentList, getInvestmentSummary(selectedCategory), selectedCategory);
-                html = generateHtmlTemplate('My Investment', body, month);
+                if(!allInvestmentsData || !allInvestmentsData[selectedCategory]) return showToastMessage('No Data!', 'bottom', 'short');
+                const body = generateHtmlForInvestmentCategory(allInvestmentsData[selectedCategory].investmentList, getInvestmentSummary(selectedCategory), selectedCategory);
+                html = generateInvestmentsHtmlTemplate('My Investment', body, { from: fromDate, to: toDate }, status, order);
             } else {
-                html = generateHtmlForAllInvestment(allInvestments, investmentSummary, month);
+                if(!allInvestmentsData || Object.keys(allInvestmentsData).length <= 0) return showToastMessage('No Data!', 'bottom', 'short');
+                html = generateHtmlForAllInvestments(allInvestmentsData, investmentSummary, { from: fromDate, to: toDate }, status, order);
             }
             const { uri } = await Print.printToFileAsync({ html });
             console.log('File has been saved to:', uri);
@@ -115,42 +122,44 @@ const Investments = ({ fromDate, toDate, selectedCategory, status, setStatus }) 
         }
     }
 
-    const summary = useMemo(()=>getInvestmentSummary(selectedCategory), [selectedCategory]);
+    const summary = getInvestmentSummary(selectedCategory);
 
     return (
         <>
-        <View>
-            {!loading &&
-                <OptionsBar
-                    status={status}
-                    setStatus={setStatus}
-                    statusOptions={INVESTMENT_FILTERS}
-                    filter={order}
-                    setFilter={setOrder}
-                    filters={INVESTMENT_SORT_OPTIONS}
-                    onPressDownload={downloadAllInvestment}
-                />
-            }
-            {loading || !allInvestments ? <ActivityIndicator size='large' color={COLORS.secondary} /> :
-                selectedCategory === 'All' ?
-                    renderAllInvestments() :
-                    <InvestmentList
-                        investments={allInvestments[selectedCategory] ? allInvestments[selectedCategory].investmentList : []}
-                        title={selectedCategory}
-                        investmentCount={summary ? summary.count : 0}
-                        totalInvested={summary ? summary.totalInvested : 0}
-                        totalReturns={summary ? summary.totalReturns : 0}
-                        fromDate={fromDate}
-                        toDate={toDate}
+            <View>
+                {!loading &&
+                    <OptionsBar
                         status={status}
-                        order={order}
-                        updateInvestmentList={updateInvestmentList}
-                        deleteInvestment={deleteInvestment}
-                        showInvestmentDetails={showInvestmentDetails}
+                        setStatus={setStatus}
+                        statusOptions={INVESTMENT_FILTERS}
+                        filter={order}
+                        setFilter={setOrder}
+                        filters={INVESTMENT_SORT_OPTIONS}
+                        onPressDownload={downloadAllInvestment}
                     />
-            }
-        </View>
-        <InvestmentDetailsModal id={selectedInvestmentId} setShowDetails={setSelectedInvestmentId} />
+                }
+                {loading || !allInvestments ? <ActivityIndicator size='large' color={COLORS.secondary} /> :
+                    selectedCategory === 'All' ?
+                        renderAllInvestments() :
+                        <InvestmentList
+                            investments={allInvestments[selectedCategory] ? allInvestments[selectedCategory].investmentList : []}
+                            title={selectedCategory}
+                            count={summary ? summary.count : 0}
+                            invCount={summary ? summary.invCount : 0}
+                            retCount={summary ? summary.retCount : 0}
+                            totalInvested={summary ? summary.totalInvested : 0}
+                            totalReturns={summary ? summary.totalReturns : 0}
+                            fromDate={fromDate}
+                            toDate={toDate}
+                            status={status}
+                            order={order}
+                            updateInvestmentList={updateInvestmentList}
+                            deleteInvestment={deleteInvestment}
+                            showInvestmentDetails={showInvestmentDetails}
+                        />
+                }
+            </View>
+            <InvestmentDetailsModal id={selectedInvestmentId} setShowDetails={setSelectedInvestmentId} />
         </>
     )
 }

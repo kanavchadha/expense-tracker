@@ -64,7 +64,7 @@ const ChartGroup = ({ selectedCategory, setSelectCategoryByName, chartData, colo
           />
         </VictoryGroup>
       </VictoryChart> */}
-      {chartData && (chartData.data1.length > 0 || chartData.data2.length > 0) &&
+      {chartData && (chartData.data1?.length > 0 || chartData.data2?.length > 0) &&
         <View styles={styles.chartView}>
           <Text style={styles.title} onPress={() => setSelectCategoryByName('All')} numberOfLines={2}>{title}</Text>
 
