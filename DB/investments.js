@@ -31,21 +31,13 @@ export const insertInvestment = async (title, category, reference, time, investm
     isActive = isActive ? 'true' : 'false';
 
     const promise = new Promise((resolve, reject) => {
-        const res = {};
         db.transaction((tx) => {
             tx.executeSql(`INSERT INTO investment (title, reference, category, timePeriod, investments, returns, startDate, isActive, totalInvAmount, totalRetAmount, totalInvCount, totalRetCount) VALUES (?, ?, ?, ?, ?, ?, datetime(?, 'localtime'), ?, ?, ?, ?, ?);`,
                 [title, reference, category, time, investments, returns, startDate, isActive, invTotal, retTotal, invCount, retCount],
-                (_, result) => { res.investment = result },
+                (_, result) => { resolve(result) },
                 (_, err) => { reject(err) },
             );
-            // tx.executeSql(`INSERT INTO expense (title, category, amount, date, description, status, invId) VALUES (?, ?, ?, datetime(?, 'localtime'), ?, ?, ?);`,
-            //     [title, 'Investment', invTotal, startDate, reference, 'true', res.investment?.insertId],
-            //     (_, result) => { res.expense = result },
-            //     (_, err) => { reject(err) },
-            // );
-        }, (err) => { reject(err) },
-            () => { resolve(res) }
-        )
+        })
     });
     return promise;
 }
@@ -61,21 +53,13 @@ export const updateInvestment = async (title, category, reference, time, investm
     isActive = isActive ? 'true' : 'false';
 
     const promise = new Promise((resolve, reject) => {
-        const res = {};
         db.transaction((tx) => {
             tx.executeSql(`UPDATE investment SET title = ?, reference = ?, category = ?, timePeriod = ?, investments = ?, returns = ?, startDate = datetime(?, 'localtime'), isActive = ?, totalInvAmount = ?, totalRetAmount = ?, totalInvCount = ?, totalRetCount = ? WHERE id = ?;`,
                 [title, reference, category, time, investments, returns, startDate, isActive, invTotal, retTotal, invCount, retCount, id],
-                (_, result) => { res.investment = result },
+                (_, result) => { resolve(result) },
                 (_, err) => { reject(err) },
             );
-            tx.executeSql(`UPDATE expense SET title = ?, category = ?, amount = ?, date = datetime(?, 'localtime'), description = ?, status = ? WHERE invId = ?;`,
-                [title, 'Investment', invTotal, startDate, reference, 'true', id],
-                (_, result) => { res.expense = result },
-                (_, err) => { reject(err) },
-            );
-        }, (err) => { reject(err) },
-            () => { resolve(res) }
-        )
+        })
     });
     return promise;
 }

@@ -16,10 +16,12 @@ import Chart from "../Components/Chart";
 import ExpenseSummary from '../Components/ExpenseSummary';
 import ViewShot from 'react-native-view-shot';
 import DateRange from '../Components/DateRange';
+import InvestmentDetailsModal from '../Components/Investment/InvestmentDetails';
 
 const LIMIT = 20;
 const CURR_DATE = new Date();
 const CURR_END_DATE = new Date();
+CURR_DATE.setDate(CURR_DATE.getDate()-7);
 CURR_DATE.setUTCHours(0, 0, 0);
 CURR_END_DATE.setUTCHours(23, 59, 59);
 
@@ -36,6 +38,7 @@ const Search = () => {
     const [order, setOrder] = useState('id DESC');
     const [offset, setOffset] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
+    const [selectedInvestmentId, setSelectedInvestmentId] = useState(false);
 
     useFocusEffect(
         useCallback(() => {
@@ -49,28 +52,28 @@ const Search = () => {
             }).catch(err => {
                 Alert.alert('Something went wrong!', 'Unable to generate Expenses Summary! ' + err.message);
             })
-        }, [status, fromDate.toISOString(), toDate.toISOString()])
+        }, [status, fromDate.toISOString(), toDate.toISOString(), order])
     );
 
-    useEffect(() => {
-        const sortedExpenses = [...expenses];
-        sortedExpenses.sort((a, b) => {
-            if (order === 'date ASC') {
-                return new Date(a.date.split(' ').join('T')).getTime() - new Date(b.date.split(' ').join('T')).getTime();
-            } else if (order === 'date DESC') {
-                return new Date(b.date.split(' ').join('T')).getTime() - new Date(a.date.split(' ').join('T')).getTime();
-            } else if (order === 'id ASC') {
-                return Number(a.id) - Number(b.id);
-            } else if (order === 'amount ASC') {
-                return Number(a.amount) - Number(b.amount);
-            } else if (order === 'amount DESC') {
-                return Number(b.amount) - Number(a.amount);
-            } else {
-                return Number(b.id) - Number(a.id);
-            }
-        })
-        setExpenses(sortedExpenses);
-    }, [order]);
+    // useEffect(() => {
+    //     const sortedExpenses = [...expenses];
+    //     sortedExpenses.sort((a, b) => {
+    //         if (order === 'date ASC') {
+    //             return new Date(a.date.split(' ').join('T')).getTime() - new Date(b.date.split(' ').join('T')).getTime();
+    //         } else if (order === 'date DESC') {
+    //             return new Date(b.date.split(' ').join('T')).getTime() - new Date(a.date.split(' ').join('T')).getTime();
+    //         } else if (order === 'id ASC') {
+    //             return Number(a.id) - Number(b.id);
+    //         } else if (order === 'amount ASC') {
+    //             return Number(a.amount) - Number(b.amount);
+    //         } else if (order === 'amount DESC') {
+    //             return Number(b.amount) - Number(a.amount);
+    //         } else {
+    //             return Number(b.id) - Number(a.id);
+    //         }
+    //     })
+    //     setExpenses(sortedExpenses);
+    // }, [order]);
 
     const searchExpenseByDate = async () => {
         setOffset(0);
@@ -193,6 +196,10 @@ const Search = () => {
         }
     }
 
+    const showInvestmentDetails = (id) => {
+        setSelectedInvestmentId(id);
+    }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.lightGray }}>
             <View style={styles.header}>
@@ -245,6 +252,8 @@ const Search = () => {
                                 copyExpense={copyExpense}
                                 deleteExpense={deleteExpense}
                                 setExpensePaid={setExpensePaid}
+                                invId={item.invId}
+                                showInvestmentDetails={showInvestmentDetails}
                                 extraCardStyles={{ marginLeft: 10, marginRight: 10, width: 320 }}
                             />
                         }
@@ -257,6 +266,7 @@ const Search = () => {
                     </View>
             }
             <SearchResSummary modalVisible={modalVisible} setModalVisible={setModalVisible} search={search} expensesSummary={expensesSummary} status={status} fromDate={fromDate} toDate={toDate} />
+            <InvestmentDetailsModal id={selectedInvestmentId} setShowDetails={setSelectedInvestmentId} />
         </SafeAreaView>
     )
 }

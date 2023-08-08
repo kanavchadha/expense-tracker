@@ -13,6 +13,7 @@ const CURR_DATE = new Date();
 const CURR_END_DATE = new Date();
 CURR_DATE.setDate(2);
 CURR_DATE.setUTCHours(0, 0, 0);
+CURR_DATE.setMonth(0);
 CURR_END_DATE.setMonth(CURR_END_DATE.getMonth() + 1);
 CURR_END_DATE.setDate(1);
 CURR_END_DATE.setUTCHours(23, 59, 59);
