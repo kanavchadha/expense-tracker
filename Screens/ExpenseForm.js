@@ -16,10 +16,12 @@ const ExpenseForm = () => {
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [invExpenseId, setInvExpenseId] = useState(null);
 
   const { goBack, } = useNavigation();
   const { params } = useRoute();
   const { isEditMode, id, copy } = params;
+  const showDescription = category === 'Investment' ? invExpenseId ? false : true : true;
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -38,6 +40,7 @@ const ExpenseForm = () => {
       setDescription(exp.description);
       setStatus(exp.status === 'true' ? true : false);
       setLoading(false);
+      setInvExpenseId(exp.invId);
     }).catch(err => {
       showToastMessage('Failed to edit this Expense!');
       console.log(err.message);
@@ -102,8 +105,11 @@ const ExpenseForm = () => {
             </View>
             <Text style={styles.inputLable}>Expense Title ({title.length}/40): </Text>
             <TextInput value={title} keyboardType='default' placeholder='Title' style={styles.input} placeholderTextColor={COLORS.primary} onChangeText={titleChangeHandler} />
-            <Text style={styles.inputLable}>Expense Description ({description.length}/120): </Text>
-            <TextInput value={description} keyboardType='default' placeholder='Little Description' style={styles.input} placeholderTextColor={COLORS.primary} onChangeText={descriptionChangeHandler} multiline numberOfLines={3} />
+            { showDescription === true ? <>
+              <Text style={styles.inputLable}>Expense Description ({description.length}/120): </Text>
+              <TextInput value={description} keyboardType='default' placeholder='Little Description' style={styles.input} placeholderTextColor={COLORS.primary} onChangeText={descriptionChangeHandler} multiline numberOfLines={3} /> 
+              </> : null
+            }
             <Text style={styles.inputLable}>Expense Amount/Value: </Text>
             <TextInput value={amount} keyboardType='number-pad' placeholder='Amount' style={styles.input} placeholderTextColor={COLORS.primary} onChangeText={(value) => setAmount(value)} />
             <Text style={styles.inputLable}>Choose Expense Date: </Text>

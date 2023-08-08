@@ -46,14 +46,17 @@ const ExpenseCard = ({ id, title, category, date, description, amount, status, i
                 {/* Actions */}
                 <View style={{ position: 'absolute', right: 10, top: 5 }}>
                     {
-                        category === 'Investment' && invId?.toString() &&
+                        invId?.toString() &&
                         <TouchableOpacity onPress={() => showInvestmentDetails(invId)} style={styles.iconButton}>
                             <FontAwesome name='ellipsis-h' size={16} color={COLORS.blue} />
                         </TouchableOpacity>
                     }
-                    <TouchableOpacity onPress={() => copyExpense(id)} style={styles.iconButton}>
-                        <FontAwesome name='copy' size={16} color={COLORS.darkYellow} />
-                    </TouchableOpacity>
+                    {
+                        !invId?.toString() &&
+                        <TouchableOpacity onPress={() => copyExpense(id)} style={styles.iconButton}>
+                            <FontAwesome name='copy' size={16} color={COLORS.darkYellow} />
+                        </TouchableOpacity>
+                    }
                     <TouchableOpacity onPress={() => editExpense(id)} style={styles.iconButton}>
                         <FontAwesome name='pencil' size={16} color={COLORS.peach} />
                     </TouchableOpacity>
@@ -67,7 +70,12 @@ const ExpenseCard = ({ id, title, category, date, description, amount, status, i
                 <Text style={{ ...FONTS.h2, color: COLORS.primary, marginBottom: 3, marginTop: -10 }} numberOfLines={1}>{title}</Text>
                 {/* description */}
                 <Text style={{ ...FONTS.body3, color: COLORS.darkgray }} numberOfLines={3}>
-                    {description}
+                    { category === 'Investment' && invId?.toString() ?
+                     `Invested in ${title.split('#')[0]} Scheme.` 
+                     : category === 'Monthly Income' && invId?.toString() ?
+                     `Income received from ${title.split('#')[0]} Scheme.`
+                     : description
+                    }
                 </Text>
             </View>
             {/* Price */}

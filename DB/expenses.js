@@ -46,6 +46,19 @@ export const updateExpense = async (title, category, amount, date, description, 
     return promise;
 }
 
+export const updateExpenseByInvId = async (title, category, amount, date, reference, status, id) => {
+    const promise = new Promise((resolve, reject) => {
+        db.transaction((tx) => {
+            tx.executeSql(`UPDATE expense SET title = ?, category = ?, amount = ?, date = datetime(?, 'localtime'), status = ? WHERE invId = ? AND description = ?;`,
+                [title, category, amount, date, status, id, reference],
+                (_, result) => { resolve(result) },
+                (_, err) => { reject(err) },
+            );
+        })
+    });
+    return promise;
+}
+
 export const getExpensesCategoryGrouped = async (status = 'false', month = null, limit = 10, withSumm = true) => {
     const promise = new Promise((resolve, reject) => {
         const expensesByCategory = {};
@@ -174,6 +187,19 @@ export const removeExpense = async (id) => {
         db.transaction((tx) => {
             tx.executeSql(`DELETE FROM expense WHERE id = ?;`,
                 [parseInt(id)],
+                (_, result) => { resolve(result) },
+                (_, err) => { reject(err) },
+            );
+        })
+    });
+    return promise;
+}
+
+export const removeExpenseByInvId = async (id, reference) => {
+    const promise = new Promise((resolve, reject) => {
+        db.transaction((tx) => {
+            tx.executeSql(`DELETE FROM expense WHERE invId = ? AND description = ?;`,
+                [parseInt(id), reference],
                 (_, result) => { resolve(result) },
                 (_, err) => { reject(err) },
             );

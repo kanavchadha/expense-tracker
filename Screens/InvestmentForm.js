@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TextInput, StyleSheet, TouchableOpacity, View, Text, Switch, ActivityIndicator } from 'react-native';
 import FormModal from '../Components/FormModal';
 import { COLORS, FONTS, investmentCategoryOptions } from '../constants';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { getInvestmentById, insertExpense, insertInvestment, updateInvestment } from '../DB';
+import { getInvestmentById, insertInvestment, updateInvestment, insertExpense, updateExpenseByInvId, removeExpenseByInvId } from '../DB';
 import { getUniqueId, showToastMessage } from '../helpers';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,9 +19,13 @@ const InvestmentForm = () => {
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  const updatedInvs = useRef({});
+  const updatedRets = useRef({});
+
   const { goBack, } = useNavigation();
   const { params } = useRoute();
   const { isEditMode, id, copy } = params;
+  let isTitleChanged = false;
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -76,6 +80,7 @@ const InvestmentForm = () => {
     setInvestments(prevInvestments => {
       if (id && (!field && !value)) {
         if (prevInvestments.length <= 1) return prevInvestments;
+        setInvListForExpUpdation(id, 'DELETE');
         return prevInvestments.filter(inv => inv.id !== id);
       }
       const updatedInvestments = [...prevInvestments];
@@ -84,15 +89,16 @@ const InvestmentForm = () => {
         showToastMessage('Unable to update investments data!');
         return prevInvestments;
       }
+      setInvListForExpUpdation(id, 'UPDATE');
       updatedInvestments[invInd] = { ...updatedInvestments[invInd], [field]: value };
       return updatedInvestments;
     })
   }
-
   const updateReturns = (id, field, value) => {
     setReturns(prevReturns => {
       if (id && (!field && !value)) {
         if (prevReturns.length <= 1) return prevReturns;
+        setRetListForIncomeUpdation(id, 'DELETE');
         return prevReturns.filter(ret => ret.id !== id);
       }
       const updatedReturns = [...prevReturns];
@@ -101,6 +107,7 @@ const InvestmentForm = () => {
         showToastMessage('Unable to update investments data!');
         return prevReturns;
       }
+      setRetListForIncomeUpdation(id, 'UPDATE');
       updatedReturns[retInd] = { ...updatedReturns[retInd], [field]: value };
       return updatedReturns;
     })
@@ -112,6 +119,7 @@ const InvestmentForm = () => {
   }
   const titleChangeHandler = (value) => {
     if (value.length > 40) return;
+    isTitleChanged = true;
     setTitle(value);
   }
   const categoryChangeHandler = (itemValue) => {
@@ -119,36 +127,148 @@ const InvestmentForm = () => {
   }
   const investmentsChangeHandler = (id, field, value) => {
     if (!id) {
-      setInvestments(prevInvestments => prevInvestments.concat({ id: getUniqueId(8), date: new Date(), amount: '', interest: '' }));
+      id = getUniqueId(8);
+      setInvestments(prevInvestments => prevInvestments.concat({ id, date: new Date(), amount: '', interest: '' }));
+      setInvListForExpUpdation(id, 'INSERT');
       return;
     }
     updateInvestments(id, field, value);
   }
   const returnsChangeHandler = (id, field, value) => {
     if (!id) {
-      setReturns(prevReturns => prevReturns.concat({ id: getUniqueId(8), date: new Date(), amount: '' }));
+      id = getUniqueId(8);
+      setReturns(prevReturns => prevReturns.concat({ id, date: new Date(), amount: '' }));
+      setRetListForIncomeUpdation(id, 'INSERT');
       return;
     }
     updateReturns(id, field, value);
+  }
+  const setInvListForExpUpdation = (invInd, operation) => {
+    switch (operation) {
+      case 'DELETE':
+        if (updatedInvs.current[invInd] && updatedInvs.current[invInd].operation === 'INSERT' && updatedInvs.current[invInd].insert) {
+          delete updatedInvs.current[invInd];
+        } else {
+          updatedInvs.current[invInd] = { operation };
+        }
+        break;
+      case 'UPDATE':
+        if (!updatedInvs.current[invInd]) // handles insert case as well
+          updatedInvs.current[invInd] = { operation };
+        break;
+      case 'INSERT':
+        updatedInvs.current[invInd] = { operation, insert: true };
+        break;
+    }
+  }
+  const setRetListForIncomeUpdation = (invInd, operation) => {
+    switch (operation) {
+      case 'DELETE':
+        if (updatedRets.current[invInd] && updatedRets.current[invInd].operation === 'INSERT' && updatedRets.current[invInd].insert) {
+          delete updatedRets.current[invInd];
+        } else {
+          updatedRets.current[invInd] = { operation };
+        }
+        break;
+      case 'UPDATE':
+        if (!updatedRets.current[invInd]) // handles insert case as well
+          updatedRets.current[invInd] = { operation };
+        break;
+      case 'INSERT':
+        updatedRets.current[invInd] = { operation, insert: true };
+        break;
+    }
   }
 
   const submit = async () => {
     if (!title || !category || category === 'Category' || investments?.length <= 0 || !timePeriod) {
       showToastMessage('Please Fill all the Fields Correctly!', 'top');
-      if(investments.length === 0) showToastMessage('Please add atleast 1 investment!', 'top');
+      if (investments.length === 0) showToastMessage('Please add atleast 1 investment!', 'top');
       throw new Error('Please Fill all the Fields');
     }
+    let res = null;
     if (isEditMode && !copy) {
-      const res = await updateInvestment(title, category, reference, timePeriod, investments, returns, isActive, id);
-      if (res.investment.rowsAffected !== 1 || res.expense.rowsAffected !== 1) throw new Error('Error in Updating Data');
-      goBack();
-      return;
+      res = await updateInvestment(title, category, reference, timePeriod, investments, returns, isActive, id);
+      if (!res || res.rowsAffected !== 1) throw new Error('Error in Updating Data');
+    } else {
+      res = await insertInvestment(title, category, reference, timePeriod, investments, returns, isActive);
+      if (!res || res.rowsAffected !== 1) throw new Error('Error in Saving Data!');
     }
-    const res = await insertInvestment(title, category, reference, timePeriod, investments, returns, isActive);
-    if(!res) throw new Error('Something went wrong!');
-    res.expense = await insertExpense(title, 'Investment', investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0), investments[0].date.toISOString(), reference, 'true', res.investment?.insertId);
-    if (res.investment.rowsAffected !== 1 || res.expense.rowsAffected !== 1) throw new Error('Error in Saving Data');
+    if (isTitleChanged) {
+      investments.forEach(inv => {
+        setInvListForExpUpdation(inv.id, 'UPDATE');
+      })
+      returns.forEach(ret => {
+        setRetListForIncomeUpdation(ret.id, 'UPDATE');
+      })
+    }
+    await upsertInvestmentExpenses(res);
+    await upsertReturnIncomes(res);
     goBack();
+  }
+
+  const upsertInvestmentExpenses = async (invRes) => {
+    const investmentRecordId = id || invRes?.insertId;
+    const invs = Object.keys(updatedInvs.current);
+    if (invs.length <= 0) console.log("Nothing to update expenses!");
+    for (let i = 0; i < invs.length; i++) {
+      const invRef = invs[i];
+      const { operation, insert } = updatedInvs.current[invRef];
+      const invNum = investments.findIndex(investment => investment.id === invRef);
+      if (invNum < 0) {
+        console.log('Unable to find investment to be updated in investments array, it should be delete operation.');
+        if (operation !== 'DELETE') {
+          throw new Error(`unable to find ${invRef} investment in current data!`);
+        }
+      }
+      const inv = investments[invNum];
+      let res = null;
+      if (operation === 'INSERT' && insert) {
+        res = await insertExpense(`${title} #${invNum + 1}`, 'Investment', inv.amount, inv.date.toISOString(), invRef, 'true', investmentRecordId);
+        if (!res || res.rowsAffected !== 1) throw new Error(`Error in Saving #${invNum + 1} Expense Data`);
+        showToastMessage(`Created #${invNum + 1} Expense successfully`);
+      } else if (operation === 'UPDATE') {
+        res = await updateExpenseByInvId(`${title} #${invNum + 1}`, 'Investment', inv.amount, inv.date.toISOString(), invRef, 'true', investmentRecordId);
+        if (!res || res.rowsAffected !== 1) throw new Error(`Error in Updating #${invNum + 1} Expense Data`);
+        showToastMessage(`Updated #${invNum + 1} Expense successfully`);
+      } else if (operation === 'DELETE') {
+        res = await removeExpenseByInvId(investmentRecordId, invRef);
+        if (!res || res.rowsAffected !== 1) throw new Error(`Error in Deleting #${invNum + 1} Expense`);
+        showToastMessage(`Deleted #${invNum + 1} Expense successfully`);
+      }
+    }
+  }
+
+  const upsertReturnIncomes = async (retRes) => {
+    const investmentRecordId = id || retRes?.insertId;
+    const rets = Object.keys(updatedRets.current);
+    if (rets.length <= 0) console.log("Nothing to update incomes!");
+    for (let i = 0; i < rets.length; i++) {
+      const retRef = rets[i];
+      const { operation, insert } = updatedRets.current[retRef];
+      const retNum = returns.findIndex(retrn => retrn.id === retRef);
+      if (retNum < 0) {
+        console.log('Unable to find return to be updated in returns array, it should be delete operation.');
+        if (operation !== 'DELETE') {
+          throw new Error(`unable to find ${retRef} investment in current data!`);
+        }
+      }
+      const ret = returns[retNum];
+      let res = null;
+      if (operation === 'INSERT' && insert) {
+        res = await insertExpense(`${title} Return #${retNum + 1}`, 'Monthly Income', ret.amount, ret.date.toISOString(), retRef, 'true', investmentRecordId);
+        if (!res || res.rowsAffected !== 1) throw new Error(`Error in Saving #${retNum + 1} Monthly Income Data`);
+        showToastMessage(`Created #${retNum + 1} Monthly Income successfully`);
+      } else if (operation === 'UPDATE') {
+        res = await updateExpenseByInvId(`${title} Return #${retNum + 1}`, 'Monthly Income', ret.amount, ret.date.toISOString(), retRef, 'true', investmentRecordId);
+        if (!res || res.rowsAffected !== 1) throw new Error(`Error in Updating #${retNum + 1} Monthly Income Data`);
+        showToastMessage(`Updated #${retNum + 1} Monthly Income successfully`);
+      } else if (operation === 'DELETE') {
+        res = await removeExpenseByInvId(investmentRecordId, retRef);
+        if (!res || res.rowsAffected !== 1) throw new Error(`Error in Deleting #${retNum + 1} Monthly Income`);
+        showToastMessage(`Deleted #${retNum + 1} Monthly Income successfully`);
+      }
+    }
   }
 
   return (
@@ -168,8 +288,9 @@ const InvestmentForm = () => {
                 }
               </Picker>
             </View>
-            <Text style={styles.inputLable}>Title ({title.length}/40): </Text>
-            <TextInput value={title} keyboardType='default' placeholder='Title' style={styles.input} placeholderTextColor={COLORS.primary} onChangeText={titleChangeHandler} />
+            <Text style={{ ...styles.inputLable, color: (isEditMode && !copy) ? COLORS.gray : COLORS.primary }}>
+              Title ({title.length}/40): </Text>
+            <TextInput value={title} keyboardType='default' placeholder='Title' style={styles.input} placeholderTextColor={COLORS.primary} onChangeText={titleChangeHandler} editable={!(isEditMode && !copy)} />
             <Text style={styles.inputLable}> Reference (optional) ({reference.length}/120): </Text>
             <TextInput value={reference} keyboardType='default' placeholder='Little Reference' style={styles.input} placeholderTextColor={COLORS.primary} onChangeText={referenceChangeHandler} multiline numberOfLines={3} />
             <Text style={styles.inputLable}> Overall Time Period (in years): </Text>
