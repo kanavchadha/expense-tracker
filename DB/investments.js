@@ -21,14 +21,14 @@ export const deleteAllInvestmentData = async () => {
 }
 
 export const insertInvestment = async (title, category, reference, time, investments, returns, isActive) => {
-    const startDate = investments[0].date.toISOString();
+    if(investments.length <= 0) throw new Error(`Cannot insert Investment Record with no investment data.`);
+    const startDate = (investments[0].date instanceof Date) ? investments[0].date.toISOString() : investments[0].date;
     const invTotal = investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0);
     const retTotal = returns.reduce((val, ret) => (val + (Math.round(Number(ret.amount) * 100) / 100)), 0);
     const invCount = investments.length;
     const retCount = returns.length;
     investments = JSON.stringify(investments);
     returns = JSON.stringify(returns);
-    isActive = isActive ? 'true' : 'false';
 
     const promise = new Promise((resolve, reject) => {
         db.transaction((tx) => {
