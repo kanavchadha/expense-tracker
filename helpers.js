@@ -3,8 +3,6 @@ import { init, generateOverallExpenseSummary, getExpenseSummary, getSearchResSum
 import { MONTHS, SEARCH_SORT_OPTIONS, categoryOptions, investmentCategoryOptions } from './constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { INVESTMENT_SORT_OPTIONS } from './constants/data';
-// import { shareAsync } from 'expo-sharing';
-// import * as Print from 'expo-print';
 
 export async function processCategoryDataToDisplay(paid, month, all = false) {
     let res;
@@ -431,7 +429,7 @@ export const generateInvestmentsHtmlTemplate = (heading, body, dates, filter, so
 export const generateHtmlForInvestmentCategory = (investmentList, catSummary, category) => {
     const invList = investmentList.reduce((invLi, inv) => {
         let investments = inv.investments ? JSON.parse(inv.investments) : [], returns = inv.returns ? JSON.parse(inv.returns) : [];
-        
+
         investments = investments.reduce((invs_, inv_) => invs_ += `
             <div style="border: 1px solid #e01616; border-radius: 5px; margin: 3px; padding: 6px; width: max-content;">
                 <span style="font-size: 16px; color: #e01616">
@@ -553,27 +551,8 @@ export const getUniqueId = (length) => {
     // return crypto.randomUUID();
 }
 
+export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 export const initDB = async () => {
     return init();
 };
-
-// export const shareFile = async (uri) => {
-//     try {
-//         await shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
-//         return { status: true };
-//     } catch (err) {
-//         showToastMessage('Unable to share this file', 'bottom', 'long');
-//         console.log(err.message);
-//         throw new Error(err.message);
-//     }
-// }
-
-// export const printToFile = async (html, print = false) => {
-//     if (print) {
-//         await Print.printAsync({ html });
-//         return;
-//     }
-//     const { uri } = await Print.printToFileAsync({ html });
-//     console.log('File has been saved to:', uri);
-//     await shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
-// }

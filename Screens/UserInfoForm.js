@@ -46,7 +46,13 @@ const UserInfoForm = () => {
   }
 
   const openInvestments = () => {
+    goBack();
     navigate('Investment')
+  }
+
+  const openImportDataScreen = () => {
+    goBack();
+    navigate('ImportData')
   }
 
   return (
@@ -73,6 +79,9 @@ const UserInfoForm = () => {
         <Button title='My Investments' color={COLORS.blue} onPress={openInvestments} />
       </View>
       <View style={{ marginTop: 20 }}>
+        <Button title='Import Data' color={COLORS.darkgreen} onPress={openImportDataScreen} />
+      </View>
+      <View style={{ marginTop: 20, marginBottom: 10 }}>
         <Button title='Delete All Data' color={COLORS.danger} onPress={deleteAllDataHandler} />
       </View>
     </FormModal>

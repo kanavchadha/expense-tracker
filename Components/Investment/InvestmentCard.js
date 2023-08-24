@@ -50,7 +50,7 @@ const InvestmentCard = ({ id, title, category, reference, timePeriod, startDate,
                     </TouchableOpacity>
                 </View>
             </View>
-            <View style={{ paddingHorizontal: SIZES.padding }}>
+            <View style={{ paddingHorizontal: SIZES.padding, flex: 1 }}>
                 <Text style={{ ...FONTS.h2, color: COLORS.primary, marginBottom: 3, marginTop: -10 }} numberOfLines={1}>{title}</Text>
                 <Text style={{ ...FONTS.body3, color: COLORS.darkgray }} numberOfLines={3}>
                     {reference}

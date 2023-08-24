@@ -21,14 +21,14 @@ export const deleteAllInvestmentData = async () => {
 }
 
 export const insertInvestment = async (title, category, reference, time, investments, returns, isActive) => {
-    const startDate = investments[0].date.toISOString();
+    validateInvestmentRecord(investments, returns);
+    const startDate = (investments[0].date instanceof Date) ? investments[0].date.toISOString() : investments[0].date;
     const invTotal = investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0);
     const retTotal = returns.reduce((val, ret) => (val + (Math.round(Number(ret.amount) * 100) / 100)), 0);
     const invCount = investments.length;
     const retCount = returns.length;
     investments = JSON.stringify(investments);
     returns = JSON.stringify(returns);
-    isActive = isActive ? 'true' : 'false';
 
     const promise = new Promise((resolve, reject) => {
         db.transaction((tx) => {
@@ -43,6 +43,7 @@ export const insertInvestment = async (title, category, reference, time, investm
 }
 
 export const updateInvestment = async (title, category, reference, time, investments, returns, isActive, id) => {
+    validateInvestmentRecord(investments, returns);
     const startDate = investments[0].date.toISOString();
     const invTotal = investments.reduce((val, inv) => (val + (Math.round(Number(inv.amount) * 100) / 100)), 0);
     const retTotal = returns.reduce((val, ret) => (val + (Math.round(Number(ret.amount) * 100) / 100)), 0);
@@ -50,7 +51,6 @@ export const updateInvestment = async (title, category, reference, time, investm
     const retCount = returns.length;
     investments = JSON.stringify(investments);
     returns = JSON.stringify(returns);
-    isActive = isActive ? 'true' : 'false';
 
     const promise = new Promise((resolve, reject) => {
         db.transaction((tx) => {
@@ -203,4 +203,14 @@ export const generateOverallInvestmentSummary = async (filter) => {
         })
     });
     return promise;
+}
+
+const validateInvestmentRecord = (investments, returns) => {
+    if (investments.length <= 0) throw new Error(`Cannot insert Investment Record with no investment data.`);
+    investments.forEach(inv => {
+        if (!inv.id || !inv.amount || !inv.date || !inv.interest) throw new Error('Invalid investments data!');
+    })
+    returns.forEach(ret => {
+        if (!ret.id || !ret.amount || !ret.date) throw new Error('Invalid returns data!');
+    })
 }

@@ -188,10 +188,10 @@ const InvestmentForm = () => {
     }
     let res = null;
     if (isEditMode && !copy) {
-      res = await updateInvestment(title, category, reference, timePeriod, investments, returns, isActive, id);
+      res = await updateInvestment(title, category, reference, timePeriod, investments, returns, isActive ? 'true' : 'false', id);
       if (!res || res.rowsAffected !== 1) throw new Error('Error in Updating Data');
     } else {
-      res = await insertInvestment(title, category, reference, timePeriod, investments, returns, isActive);
+      res = await insertInvestment(title, category, reference, timePeriod, investments, returns, isActive ? 'true' : 'false');
       if (!res || res.rowsAffected !== 1) throw new Error('Error in Saving Data!');
     }
     if (isTitleChanged) {

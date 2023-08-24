@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, ActivityIndicator, Alert, ScrollView, Dimensions } from 'react-native'
 import { FONTS, COLORS } from '../constants';
 import { useNavigation } from '@react-navigation/native';
@@ -7,8 +7,11 @@ import { showToastMessage } from '../helpers';
 const FormModal = (props) => {
     const [loading, setLoading] = useState(false);
     const { goBack } = useNavigation();
+    const scrollContainer = useRef(null);
+    const disableBtn = props.disableBtn ? props.disableBtn : false;
 
     const submitForm = async () => {
+        if(scrollContainer.current) scrollContainer.current.scrollToEnd();
         try {
             setLoading(true);
             await props.submit();
@@ -28,13 +31,13 @@ const FormModal = (props) => {
             <View style={styles.backdrop} onTouchEnd={goBack} />
             <Text style={styles.title} numberOfLines={2}>{props.title}</Text>
             <View style={styles.form}>
-                <ScrollView>
+                <ScrollView ref={scrollContainer}>
                     {props.children}
                 </ScrollView>
                 <View>
-                    <TouchableOpacity activeOpacity={0.8} onPress={submitForm} disabled={loading}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={submitForm} disabled={(loading || disableBtn)}>
                         <View style={styles.button}>
-                            <Text style={styles.buttonText}>Submit</Text>
+                            <Text style={styles.buttonText}>{props.submitBtnText ? props.submitBtnText : 'Submit'}</Text>
                             {loading && <ActivityIndicator color={COLORS.lightGray} style={{ marginLeft: 6 }} />}
                         </View>
                     </TouchableOpacity>

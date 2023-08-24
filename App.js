@@ -55,7 +55,7 @@ export default function App() {
   }, []);
 
   const [loaded] = useFonts({
-    'Roboto-regular': require('./assets/fonts/Roboto-Regular.ttf'),
+    'Roboto-Regular': require('./assets/fonts/Roboto-Regular.ttf'),
     'Roboto-Black': require('./assets/fonts/Roboto-Black.ttf'),
     'Roboto-Bold': require('./assets/fonts/Roboto-Bold.ttf'),
   });
