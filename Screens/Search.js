@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useContext } from 'react'
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native'
 import { COLORS, FONTS, SEARCH_SORT_OPTIONS, SIZES } from '../constants'
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +17,7 @@ import ExpenseSummary from '../Components/ExpenseSummary';
 import ViewShot from 'react-native-view-shot';
 import DateRange from '../Components/DateRange';
 import InvestmentDetailsModal from '../Components/Investment/InvestmentDetails';
+import { AppConfigContext } from '../Context/appConfig';
 
 const LIMIT = 20;
 const CURR_DATE = new Date();
@@ -27,6 +28,7 @@ CURR_END_DATE.setUTCHours(23, 59, 59);
 
 const Search = () => {
     const { goBack, navigate } = useNavigation();
+    const { invInSumm } = useContext(AppConfigContext);
 
     const [search, setSearch] = useState('');
     const [expenses, setExpenses] = useState([]);
@@ -47,7 +49,7 @@ const Search = () => {
             } else {
                 searchExpenseByDate();
             }
-            processSearchResToDisplay(status, fromDate.toISOString(), toDate.toISOString(), search).then(res => {
+            processSearchResToDisplay(status, fromDate.toISOString(), toDate.toISOString(), search, {invInSumm}).then(res => {
                 setExpensesSummary(res);
             }).catch(err => {
                 Alert.alert('Something went wrong!', 'Unable to generate Expenses Summary! ' + err.message);

@@ -7,6 +7,7 @@ import ExpenseForm from '../Screens/ExpenseForm';
 import Investment from '../Screens/Investment';
 import InvestmentForm from '../Screens/InvestmentForm';
 import ImportDataScreen from '../Screens/ImportData';
+import AppConfigsForm from '../Screens/AppConfigsForm';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,8 +32,9 @@ const StackNavigator = () => {
         <Stack.Screen name="ExpenseForm" component={ExpenseForm} />
         <Stack.Screen name="InvestmentForm" component={InvestmentForm} />
         <Stack.Screen name="ImportData" component={ImportDataScreen} options={{animation: 'default'}} />
+        <Stack.Screen name="AppConfigsForm" component={AppConfigsForm} options={{animation: 'default'}} />
       </Stack.Group>
-      <Stack.Screen name="Investment" component={Investment} />
+      <Stack.Screen name="Investment" component={Investment} options={{animation: 'slide_from_right'}} />
     </Stack.Navigator>
 
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useContext } from "react";
 import { View, Alert, ActivityIndicator } from 'react-native';
 import { COLORS } from '../constants';
 import { processCategoryDataToDisplay, showToastMessage } from '../helpers';
@@ -9,8 +9,10 @@ import SummaryHeader from "./SummaryHeader";
 import ViewShot from 'react-native-view-shot';
 import { shareAsync } from 'expo-sharing';
 import { useFocusEffect } from '@react-navigation/native';
+import { AppConfigContext } from '../Context/appConfig';
 
 export default function ExpenseCharts({ selectedCategory, setSelectedCategory, month, setMonth }) {
+    const { invInSumm } = useContext(AppConfigContext);
 
     const [chartData, setChartData] = useState([]);
     const [colorScales, setColorScales] = useState([]);
@@ -23,7 +25,7 @@ export default function ExpenseCharts({ selectedCategory, setSelectedCategory, m
     useFocusEffect(
         useCallback(() => {
             setLoading(true);
-            processCategoryDataToDisplay(status, month).then(res => {
+            processCategoryDataToDisplay(status, month, false, {invInSumm}).then(res => {
                 setChartData(res.finalChartData);
                 setColorScales(res.finalChartData.map((item) => item.color));
                 setTotalExpenditure({ total: res.totalExpense, count: res.expenseCount, details: res.expSumDetail });
@@ -33,7 +35,7 @@ export default function ExpenseCharts({ selectedCategory, setSelectedCategory, m
                 setLoading(false);
                 Alert.alert('Something went wrong!', 'Error occured while calclating data.\n' + err.message);
             })
-        }, [status, month])
+        }, [status, month, invInSumm])
     )
 
     const downloadExpenseAnalysis = async () => {

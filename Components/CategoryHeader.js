@@ -4,7 +4,7 @@ import { COLORS, FONTS, SIZES, icons } from '../constants';
 
 export default CategoryHeader = ({ viewMode, setViewMode, numOfCategories }) => {
     return (
-        <View style={{ flexDirection: 'row', paddingVertical: 8, paddingHorizontal: SIZES.padding, justifyContent: 'space-between', alignItems: 'center', marginTop: 3 }}>
+        <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: SIZES.padding, justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
                 <View>
                     <Text style={{ color: COLORS.primary, ...FONTS.h3 }}>CATEGORIES</Text>

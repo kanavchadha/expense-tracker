@@ -7,6 +7,7 @@ import { enableScreens } from 'react-native-screens';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 import UserContextProvider from './Context/user';
+import AppConfigContextProvider from './Context/appConfig';
 import { initDB, getUnpaidNotificationData } from './helpers';
 
 enableScreens();
@@ -36,7 +37,7 @@ export default function App() {
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", nextAppState => {
-      if(nextAppState === 'active') return;
+      if (nextAppState === 'active') return;
       Notifications.cancelAllScheduledNotificationsAsync().then(async res => {
         const { notificationContent, trigger } = await getUnpaidNotificationData();
         if (!trigger) return;
@@ -66,9 +67,11 @@ export default function App() {
     <>
       <StatusBar style="auto" />
       <UserContextProvider>
-        <NavigationContainer theme={theme}>
-          <StackNavigator />
-        </NavigationContainer>
+        <AppConfigContextProvider>
+          <NavigationContainer theme={theme}>
+            <StackNavigator />
+          </NavigationContainer>
+        </AppConfigContextProvider>
       </UserContextProvider>
     </>
   );

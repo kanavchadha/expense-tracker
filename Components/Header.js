@@ -26,7 +26,7 @@ export default Header = ({ month, setModalVisible }) => {
     }, [month]);
 
     return (
-        <View style={{ paddingHorizontal: SIZES.padding, paddingVertical: SIZES.padding, backgroundColor: COLORS.white }}>
+        <View style={{ paddingHorizontal: SIZES.padding, paddingTop: SIZES.padding, paddingBottom: SIZES.paddingS,  backgroundColor: COLORS.white }}>
             <View style={{ justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{ flex: 1 }}>
                     <Text style={{ color: COLORS.primary, ...FONTS.h2, fontSize: 20 }}> Hi, {userName} </Text>
@@ -42,39 +42,44 @@ export default Header = ({ month, setModalVisible }) => {
                 </TouchableOpacity>
             </View>
 
-            <View style={{ flexDirection: 'row', marginTop: SIZES.padding, alignItems: 'center' }}>
-                <View style={{
-                    backgroundColor: COLORS.lightGray,
-                    height: 50,
-                    width: 50,
-                    borderRadius: 25,
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}>
-                    <Image
-                        source={icons.calendar}
-                        style={{
-                            width: 25,
-                            height: 25,
-                            tintColor: COLORS.purple
-                        }}
-                    />
-                </View>
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{
+                        backgroundColor: COLORS.lightGray,
+                        height: 50,
+                        width: 50,
+                        borderRadius: 25,
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        <Image
+                            source={icons.calendar}
+                            style={{
+                                width: 25,
+                                height: 25,
+                                tintColor: COLORS.purple
+                            }}
+                        />
+                    </View>
 
-                <View style={{ marginLeft: SIZES.radius }}>
-                    <Text style={{ color: COLORS.purple, ...FONTS.h3 }}>{new Date().toDateString()}</Text>
-                    {
-                        analysis !== null &&
-                        <Text style={{ ...FONTS.body4, color: COLORS.darkgray }} numberOfLines={1}>
-                            {
-                                analysis === 0 ? 'Same as previous month!' :
-                                    analysis < 0 ? Math.abs(analysis) + '% Less than last month :)' :
-                                        Math.abs(analysis) + "% More than last month!!"
-                            }
-                        </Text>
-                    }
+                    <View style={{ marginLeft: SIZES.radius }}>
+                        <Text style={{ color: COLORS.purple, ...FONTS.h3 }}>{new Date().toDateString()}</Text>
+                        {
+                            analysis !== null &&
+                            <Text style={{ ...FONTS.body4, color: COLORS.darkgray }} numberOfLines={1}>
+                                {
+                                    analysis === 0 ? 'Same as previous month!' :
+                                        analysis < 0 ? Math.abs(analysis) + '% Less than last month :)' :
+                                            Math.abs(analysis) + "% More than last month!!"
+                                }
+                            </Text>
+                        }
+                    </View>
                 </View>
+                <TouchableOpacity onPress={() => navigate('ExpenseForm', {})} style={{ justifyContent: 'center' }} activeOpacity={0.6}>
+                    <Ionicons name='add-circle-outline' size={40} color={COLORS.primary} />
+                </TouchableOpacity>
             </View>
-        </View >
+        </View>
     )
 }

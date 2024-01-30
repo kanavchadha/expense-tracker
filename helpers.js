@@ -4,22 +4,22 @@ import { MONTHS, SEARCH_SORT_OPTIONS, categoryOptions, investmentCategoryOptions
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { INVESTMENT_SORT_OPTIONS } from './constants/data';
 
-export async function processCategoryDataToDisplay(paid, month, all = false) {
+export async function processCategoryDataToDisplay(paid, month, all = false, configs={}) {
     let res;
     if (!all) {
         res = await getExpenseSummary(paid, month);
     } else {
         res = await generateOverallExpenseSummary(paid);
     }
-    return transformExpenseSummaryData(res);
+    return transformExpenseSummaryData(res, configs);
 }
 
-export async function processSearchResToDisplay(status, fromDate, toDate, value) {
+export async function processSearchResToDisplay(status, fromDate, toDate, value, configs={}) {
     let res = await getSearchResSummary(status, fromDate, toDate, value);
-    return transformExpenseSummaryData(res);
+    return transformExpenseSummaryData(res, configs);
 }
 
-const transformExpenseSummaryData = (res) => {
+const transformExpenseSummaryData = (res, configs) => {
     res = res.reduce((obj, catSum) => {
         const { category, count, total, status } = catSum;
         obj[category] = { ...obj[category], total: total + (obj[category] ? obj[category].total : 0), count: count + (obj[category] ? obj[category].count : 0) };
@@ -32,6 +32,10 @@ const transformExpenseSummaryData = (res) => {
         }
         return obj;
     }, {});
+
+    if (configs.invInSumm === false) {
+        delete res['Investment'];
+    }
 
     const income = res['Monthly Income'] ? res['Monthly Income'] : { total: 0, count: 0 };
     delete res['Monthly Income'];

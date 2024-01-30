@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { View, Image, TouchableOpacity, Text } from 'react-native';
-import { COLORS, SIZES, FONTS } from '../constants';
+import { COLORS, FONTS } from '../constants';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { UserContext } from '../Context/user';
@@ -44,10 +44,8 @@ export default NavBar = () => {
                 }}> My Expenses</Text>
             </View>
 
-            <TouchableOpacity onPress={() => navigate('ExpenseForm', {})}
-                style={{ justifyContent: 'center' }}
-            >
-                <Ionicons name='add-circle-outline' size={35} color={COLORS.primary} />
+            <TouchableOpacity onPress={() => navigate('AppConfigsForm', {})} style={{ justifyContent: 'center' }} activeOpacity={0.6}>
+                <Ionicons name='settings-sharp' size={32} color={COLORS.primary} />
             </TouchableOpacity>
         </View>
     )

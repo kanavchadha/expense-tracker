@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useContext } from 'react'
 import { Text, StyleSheet, View, Dimensions, Modal, ScrollView, Image, Alert, ActivityIndicator } from 'react-native'
 import { COLORS, FONTS, SIZES } from '../constants';
 import logo from '../assets/icon.png';
@@ -9,8 +9,11 @@ import { shareAsync } from 'expo-sharing';
 import Chart from "./Chart";
 import SummaryHeader from "./SummaryHeader";
 import ExpenseSummary from './ExpenseSummary';
+import { AppConfigContext } from '../Context/appConfig';
 
 export default OverAllExpenseSummaryModal = ({ modalVisible, setModalVisible }) => {
+    const { invInSumm } = useContext(AppConfigContext);
+
     const [category, setCategory] = useState('');
     const [chartData, setChartData] = useState([]);
     const [colorScales, setColorScales] = useState([]);
@@ -22,7 +25,7 @@ export default OverAllExpenseSummaryModal = ({ modalVisible, setModalVisible }) 
 
     useEffect(() => {
         setLoading(true);
-        processCategoryDataToDisplay(status, null, true).then(res => {
+        processCategoryDataToDisplay(status, null, true, {invInSumm}).then(res => {
             setChartData(res.finalChartData);
             setColorScales(res.finalChartData.map((item) => item.color));
             setTotalExpenditure({ total: res.totalExpense, count: res.expenseCount, details: res.expSumDetail });

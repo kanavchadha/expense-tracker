@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { TextInput, StyleSheet, TouchableOpacity, View, Text, Switch, ActivityIndicator } from 'react-native';
 import FormModal from '../Components/FormModal';
 import { COLORS, FONTS, investmentCategoryOptions } from '../constants';
@@ -8,8 +8,11 @@ import { getInvestmentById, insertInvestment, updateInvestment, insertExpense, u
 import { getUniqueId, showToastMessage } from '../helpers';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { AppConfigContext } from '../Context/appConfig';
 
 const InvestmentForm = () => {
+  const { createInvExp, createRetInc } = useContext(AppConfigContext);
+
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
   const [reference, setReference] = useState('');
@@ -202,8 +205,12 @@ const InvestmentForm = () => {
         setRetListForIncomeUpdation(ret.id, 'UPDATE');
       })
     }
-    await upsertInvestmentExpenses(res);
-    await upsertReturnIncomes(res);
+    if (createInvExp) {
+      await upsertInvestmentExpenses(res);
+    }
+    if (createRetInc) {
+      await upsertReturnIncomes(res);
+    }
     goBack();
   }
 

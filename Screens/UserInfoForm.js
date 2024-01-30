@@ -73,10 +73,7 @@ const UserInfoForm = () => {
           <Picker.Item key='3' label='Never' value='Never' />
         </Picker>
       </View>
-      {notification === 'EveryDay' &&
-        <Text style={{ ...FONTS.h4, color: COLORS.purple, }}>NOTE: In "EveryDay" notifications you atleast have to open App once in a day! </Text>
-      }
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: 10 }}>
         <Button title='My Investments' color={COLORS.blue} onPress={openInvestments} />
       </View>
       <View style={{ marginTop: 20 }}>
