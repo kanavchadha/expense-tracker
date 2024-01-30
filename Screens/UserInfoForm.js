@@ -15,7 +15,8 @@ const UserInfoForm = () => {
 
   const submit = async () => {
     if (!userName || !userImage) {
-      return showToastMessage('Please fill all the Fields Correctly!', 'top');
+      showToastMessage('Please fill all the Fields Correctly!', 'top');
+      throw new Error('Please fill all the Fields Correctly');
     }
     const { err } = await saveUserData();
     if (err) throw new Error(err);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native'
-import { COLORS, FONTS, SEARCH_SORT_OPTIONS } from '../constants'
+import { COLORS, FONTS, SEARCH_SORT_OPTIONS, SIZES } from '../constants'
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -313,7 +313,7 @@ const SearchResSummary = ({ modalVisible, setModalVisible, expensesSummary, stat
                             summaryDetails={expensesSummary.expSumDetail}
                         />
                         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            <Chart title='Expenses' selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={expensesSummary.expenseCount} />
+                            <Chart title='Expenses' selectedCategory={category} setSelectCategoryByName={setCategory} chartData={chartData} colorScales={colorScales} totalCount={expensesSummary.expenseCount} extraTitleStyles={{ left: SIZES.width / 2.7 }} />
                         </View>
                         <ExpenseSummary data={chartData} selectedCategory={category} setSelectedCategory={setCategory} status={status} totalExpenditure={expensesSummary?.expSumDetail?.paidExpenseTotal} totalIncome={expensesSummary?.income?.paidAmount} />
                     </View>

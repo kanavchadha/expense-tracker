@@ -24,9 +24,8 @@ const ImageSelector = ({ image, setImage }) => {
             aspect: [8, 8],
             quality: 0.5,
         });
-        // console.log(image);
-        if (!image.cancelled) {
-            setImage(image.uri);
+        if (!image.canceled && image.assets?.length > 0) {
+            setImage(image.assets[0].uri);
         }
     }
 
@@ -39,9 +38,8 @@ const ImageSelector = ({ image, setImage }) => {
             aspect: [8, 8],
             quality: 0.5,
         });
-        // console.log(image);
-        if (!image.cancelled) {
-            setImage(image.uri);
+        if (!image.canceled && image.assets?.length > 0) {
+            setImage(image.assets[0].uri);
         }
     }
 
@@ -50,7 +48,7 @@ const ImageSelector = ({ image, setImage }) => {
         <View style={styles.imagePicker}>
             <View style={styles.imageView}>
                 {!image ?
-                    <Ionicons name='person-circle-outline' size={80} color={COLORS.primary} /> :
+                    <Ionicons name='person-circle-outline' size={88} color={COLORS.primary} /> :
                     <Image source={{ uri: image }} style={styles.image} resizeMode="contain" />
                 }
             </View>

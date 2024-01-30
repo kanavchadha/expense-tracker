@@ -39,7 +39,6 @@ export default function App() {
       if(nextAppState === 'active') return;
       Notifications.cancelAllScheduledNotificationsAsync().then(async res => {
         const { notificationContent, trigger } = await getUnpaidNotificationData();
-        // console.log('trigger: ',trigger, notificationContent);
         if (!trigger) return;
         await Notifications.scheduleNotificationAsync({
           content: notificationContent,

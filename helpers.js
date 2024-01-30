@@ -173,7 +173,7 @@ export const getUnpaidNotificationData = async () => {
     try {
         const res = await getUnpaidExpenses();
         const body = res.rows._array.reduce((content, exp, i) =>
-            content += `${i + 1}) name: ${exp.title}, amount: ${exp.amount}, date: ${new Date(exp.date.split(' ')[0]).toDateString()}\n`
+            content += `${i + 1}) ${exp.title}: ${exp.amount} Rs ~ ${new Date(exp.date.split(' ')[0]).toDateString()}\n`
             , '')
         const { trigger, userName } = await getNotificationInfo();
         return {
@@ -192,7 +192,7 @@ export const getUnpaidNotificationData = async () => {
 async function getNotificationInfo() {
     try {
         const userData = await getUserData();
-        const notification = userData?.notification, userName = userData && userData.userName ? userData.userName : 'anonymous';
+        const notification = userData?.notification, userName = userData?.name;
         const trigger = new Date();
         if (notification === 'EveryDay') {
             if (trigger.getHours() > 10) trigger.setDate(trigger.getDate() + 1);

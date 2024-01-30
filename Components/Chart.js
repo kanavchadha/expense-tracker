@@ -43,7 +43,7 @@ const Chart = ({ selectedCategory, setSelectCategoryByName, chartData, colorScal
                     easing: "circle"
                 }}
             />
-            <View style={{ position: 'absolute', top: SIZES.width / 2.38, left: SIZES.width / 2.46, ...extraTitleStyles }} onTouchEnd={() => setSelectCategoryByName('All')}>
+            <View style={{ position: 'absolute', top: SIZES.width / 2.38, left: SIZES.width / 2.42, ...extraTitleStyles }} onTouchEnd={() => setSelectCategoryByName('All')}>
                 <Text numberOfLines={1} style={{ ...FONTS.h1, textAlign: 'center', color: COLORS.primary }}>{totalCount}</Text>
                 <Text numberOfLines={1} style={{ ...FONTS.body3, textAlign: 'center', color: COLORS.primary }}>{title}</Text>
             </View>

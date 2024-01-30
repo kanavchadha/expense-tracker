@@ -8,7 +8,7 @@ export const UserContext = createContext();
 const UserContextProvider = (props) => {
     const [name, setName] = useState('anonymous');
     const [image, setImage] = useState('https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Download-Image.png');
-    const [notification, setNotification] = useState('Never');
+    const [notification, setNotification] = useState('EveryDay');
 
     useEffect(() => {
         getUserData().then(userInfo => {

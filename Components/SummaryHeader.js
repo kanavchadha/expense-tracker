@@ -23,7 +23,7 @@ const SummaryHeader = ({ status, monthlyIncome, totalExpenditure, expenseCount, 
                 <View>
                     <Text numberOfLines={1} style={{ ...FONTS.h3, letterSpacing: 1, color: COLORS.primary }}>Savings </Text>
                     <View style={{ ...styles.resHeading, borderColor: COLORS.primary, backgroundColor: COLORS.primary }} />
-                    <Text numberOfLines={1} style={{ ...FONTS.body3, textAlign: 'center', color: COLORS.primary }}>{savings ? savings : 0} Rs </Text>
+                    <Text numberOfLines={1} style={{ ...FONTS.body3, textAlign: 'center', color: COLORS.primary }}>{savings ? savings?.toFixed(2) : 0} Rs </Text>
                 </View>
             }
             <View>
